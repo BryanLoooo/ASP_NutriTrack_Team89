@@ -21,6 +21,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
+  headerInner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -64,10 +69,6 @@ const styles = StyleSheet.create({
   },
   activityButtonText: {
     color: '#00a8ff',
-  },
-  progressContainer: {
-    paddingHorizontal: 20,
-    marginTop: 20,
   },
   progressBar: {
     height: 10,
@@ -137,29 +138,51 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: '#fff',
     },
+    header: {
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
     themeButton: {
       padding: 10,
       borderRadius: 10,
-      backgroundColor: '#333',
     },
-    themeButtonText: {
-      color: '#fff',
+    themeButtonImage: {
+      width: 24,
+      height: 24,
+      resizeMode: 'contain',
     },
+    // ... other styles
   },
   dark: {
     container: {
       flex: 1,
       backgroundColor: '#333',
     },
+    header: {
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#666',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#fff',
+    },
     themeButton: {
       padding: 10,
       borderRadius: 10,
-      backgroundColor: '#fff',
     },
-    themeButtonText: {
-      color: '#333',
+    themeButtonImage: {
+      width: 24,
+      height: 24,
+      resizeMode: 'contain',
     },
-  }
+  },
 });
 
 const Stack = createStackNavigator();
@@ -238,52 +261,56 @@ const HomeScreen = ({ navigation, theme, toggleTheme }) => {
   //user interface elements
   return (
     <ScrollView style={styles[theme].container}> 
-      <View style={styles.header}>
-        <Text style={styles.title}>NutriTrack</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.articleList}
+  <View style={styles.header}>
+    <View style={styles.headerInner}>
+      <Text style={styles.title}>NutriTrack</Text>
+      <TouchableOpacity style={styles[theme].themeButton} onPress={toggleTheme}>
+        <Image source={theme === 'light' ? require('../../project/my-app/assets/Sun.png') : require('../../project/my-app/assets/Moon.png')} style={styles[theme].themeButtonImage} />
+      </TouchableOpacity>
+    </View>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.articleList}
+    >
+      {articles.map((article) => (
+        <TouchableOpacity
+          key={article}
+          style={[styles.articleButton, selectedArticle === article && styles.selectedArticleButton]}
+          onPress={() => navigation.navigate('Articles')}
         >
-          {articles.map((article) => (
-            <TouchableOpacity
-              key={article}
-              style={[styles.articleButton, selectedArticle === article && styles.selectedArticleButton]}
-              onPress={() => handleActivityPress(article)}
-            >
-              <Text style={styles.articleButtonText}>{article}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-        <View style={styles.activityButtons}>
-          {activities.map((activity) => (
-            <TouchableOpacity
-              key={activity}
-              style={[styles.activityButton, selectedActivity === activity && styles.selectedActivityButton]}
-              onPress={() => handleActivityPress(activity)}
-            >
-              <Text style={styles.activityButtonText}>{activity}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-      <View>
-        <TouchableOpacity style={styles[theme].themeButton} onPress={toggleTheme}>
-          <Text style={styles[theme].themeButtonText}>Theme: {theme}</Text>
+          <Text style={styles.articleButtonText}>{article}</Text>
         </TouchableOpacity>
-      </View>
+      ))}
+    </ScrollView>
+    <View style={styles.activityButtons}>
+      {activities.map((activity) => (
+        <TouchableOpacity
+          key={activity}
+          style={[styles.activityButton, selectedActivity === activity && styles.selectedActivityButton]}
+          onPress={() => navigation.navigate('Social')}
+        >
+          <Text style={styles.activityButtonText}>{activity}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </View>
+    <View style={styles.dailyProgressContainer}>
+    <View style={styles.dailyProgressItem}>
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressBarFill, { width: `${(caloriesConsumed / caloriesGoal) * 100}%` }]} />
+          <View style={[styles.dailyProgressFill, { width: `${(caloriesConsumed / caloriesGoal) * 100}%` }]} />
         </View>
       </View>
       <View style={styles.statsContainer}>
-      <Text style={styles.statsText}>Calories: {caloriesConsumed} cals</Text>
-        <Text style={styles.statsText}>Goal: {caloriesGoal} cals</Text>
-        <Text style={styles.statsText}>Protein: {proteinConsumed}g</Text>
-        <Text style={styles.statsText}>Fats: {fatConsumed}g</Text>
-        <Text style={styles.statsText}>Carbohydrates: {carbohydrateConsumed}g</Text>
+      <Text style={styles.dailyProgressText}>Calories: {caloriesConsumed} cals</Text>
+        <Text style={styles.dailyProgressText}>Goal: {caloriesGoal} cals</Text>
+        <Text style={styles.dailyProgressText}>Protein: {proteinConsumed}g</Text>
+        <Text style={styles.dailyProgressText}>Fats: {fatConsumed}g</Text>
+        <Text style={styles.dailyProgressText}>Carbohydrates: {carbohydrateConsumed}g</Text>
       </View>
+    </View>
+    </View>
       <View style={styles.dailyProgressContainer}>
         <View style={styles.dailyProgressItem}>
           <Text style={styles.dailyProgressText}>Mon</Text>
