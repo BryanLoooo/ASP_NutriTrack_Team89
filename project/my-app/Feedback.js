@@ -1,8 +1,47 @@
 
+//import libraries
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
 import { addFeedback } from './firebaseConfig';
 
+//stylesheet
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  formContainer: {
+    width: '100%',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    height: 100,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    width: '90%',
+    paddingHorizontal: 10,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 10,
+  },
+  submittedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  submittedText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
+
+//constant variable decleration
 const FeedbackForm = () => {
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -56,40 +95,5 @@ const SubmittedFeedback = () => (
   </View>
 );
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  formContainer: {
-    width: '100%',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  input: {
-    height: 100,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    width: '90%',
-    paddingHorizontal: 10,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-  },
-  submittedContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  submittedText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
-
+//export the constant variable
 export default FeedbackForm;

@@ -1,23 +1,69 @@
-// // Social.js
-// import React from 'react';
-// import { View, Text } from 'react-native';
 
-// const SocialScreen = () => {
-//   return (
-//     <View>
-//       <Text>Social Screen</Text>
-//     </View>
-//   );
-// };
-// export default SocialScreen;
-
-
+//import libraries
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { WebView } from 'react-native-webview';
 
-const App = () => {
+//stylesheet
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  itemContainer: {
+    padding: 10,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#ddd',
+  },
+  itemName: {
+    fontWeight: 'bold',
+  },
+  itemDescription: {
+    fontStyle: 'italic',
+  },
+  itemDate: {
+    color: 'gray',
+  },
+  eventsContainer: {
+    marginTop: 20,
+  },
+  eventContainer: {
+    padding: 10,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#ddd',
+  },
+  eventName: {
+    fontWeight: 'bold',
+  },
+  eventDate: {
+    color: 'gray',
+  },
+  eventDescription: {
+    marginTop: 5,
+  },
+  button: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 20,
+  },
+});
+
+//constant variable for external reference
+const Social = () => {
   const [groups, setGroups] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [events, setEvents] = useState([]);
@@ -106,6 +152,7 @@ const App = () => {
     setShowModal(true);
   };
 
+  //user interface elements
   return (
     <View style={styles.container}>
       <Text>Groups:</Text>
@@ -162,60 +209,20 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  itemContainer: {
-    padding: 10,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#ddd',
-  },
-  itemName: {
-    fontWeight: 'bold',
-  },
-  itemDescription: {
-    fontStyle: 'italic',
-  },
-  itemDate: {
-    color: 'gray',
-  },
-  eventsContainer: {
-    marginTop: 20,
-  },
-  eventContainer: {
-    padding: 10,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#ddd',
-  },
-  eventName: {
-    fontWeight: 'bold',
-  },
-  eventDate: {
-    color: 'gray',
-  },
-  eventDescription: {
-    marginTop: 5,
-  },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    padding: 20,
-  },
-});
+//export the constant variable
+export default Social;
 
-export default App;
+//===========================================================================
+//Sample codes
+// // Social.js
+// import React from 'react';
+// import { View, Text } from 'react-native';
+
+// const SocialScreen = () => {
+//   return (
+//     <View>
+//       <Text>Social Screen</Text>
+//     </View>
+//   );
+// };
+// export default SocialScreen;
