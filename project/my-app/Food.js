@@ -227,4 +227,56 @@ const FoodScreen = ({ navigation }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+  },
+  foodItem: {
+    padding: 10,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+  },
+  foodName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  foodDetails: {
+    marginTop: 20,
+  },
+  macroContainer: {
+    marginTop: 20,
+  },
+  macro: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  macroLabel: {
+    fontSize: 16,
+    flex: 1,
+  },
+  macroInput: {
+    flex: 2,
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+  },
+});
+
 export default FoodScreen;
