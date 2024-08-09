@@ -1,14 +1,13 @@
 
 //import libraries
 import React, { useState } from 'react';
-import { View, Text, Button, TextInput, StyleSheet } from 'react-native';
+import { View, Text, Button, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { addFeedback } from './firebaseConfig';
 
 //stylesheet
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
   formContainer: {
     width: '100%',
@@ -39,10 +38,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderColor: '#e0e0e0',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 515,
+  },
+  footerButton: {
+    alignItems: 'center',
+  },
+  footerButtonIcon: {
+    width: 24,
+    height: 24,
+    marginBottom: 5,
+  },
+  footerButtonText: {
+    fontSize: 12,
+  },
 });
 
 //constant variable decleration
-const FeedbackForm = () => {
+const FeedbackForm = ({ navigation }) => {
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -85,6 +108,28 @@ const FeedbackForm = () => {
           <Button title="Submit Feedback" onPress={handleSubmit} />
         </View>
       )}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Feedback')}>
+          <Image source={require('../../project/my-app/assets/Feedback.png')} style={styles.footerButtonIcon} />
+          <Text style={styles.footerButtonText}>Feedback</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Articles')}>
+          <Image source={require('../../project/my-app/assets/Articles.png')} style={styles.footerButtonIcon} />
+          <Text style={styles.footerButtonText}>Article</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
+          <Image source={require('../../project/my-app/assets/Home.png')} style={styles.footerButtonIcon} />
+          <Text style={styles.footerButtonText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Social')}>
+          <Image source={require('../../project/my-app/assets/Social.png')} style={styles.footerButtonIcon} />
+          <Text style={styles.footerButtonText}>Social</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Food')}>
+          <Image source={require('../../project/my-app/assets/Food.png')} style={styles.footerButtonIcon} />
+          <Text style={styles.footerButtonText}>Food</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
