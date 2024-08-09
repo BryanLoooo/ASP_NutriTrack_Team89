@@ -48,4 +48,4 @@ If everything is set up _correctly_, you should see your new app running in your
 
 ## Congratulations! :tada:
 
-You've successfully run and modified your React Native App. :partying_face:
+You've a working login and sign up page! (Without the backend):partying_face:
