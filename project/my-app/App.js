@@ -1,7 +1,11 @@
-// App.js
+
+//App.js
+//import libraries
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+
+//import external module for navigation
 import HomeScreen from './Home';
 import FeedbackScreen from './Feedback';
 import ArticlesScreen from './Articles';
@@ -12,6 +16,7 @@ import LoginScreen from './Login';
 const Stack = createStackNavigator();
 
 const App = () => {
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -26,4 +31,5 @@ const App = () => {
   );
 };
 
+//export App as an external module for referencing
 export default App;

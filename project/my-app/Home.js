@@ -1,4 +1,5 @@
 
+//Home.js
 //import libraries
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
@@ -151,7 +152,6 @@ const styles = StyleSheet.create({
       height: 24,
       resizeMode: 'contain',
     },
-    // ... other styles
   },
   dark: {
     container: {
@@ -180,7 +180,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const HomeScreen = ({ navigation, theme = 'light', toggleTheme }) => {
+const HomeScreen = ({ navigation }) => {
+
+  const [theme, setTheme] = useState('light');
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+  
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [caloriesConsumed, setCaloriesConsumed] = useState(1000);
@@ -340,5 +347,5 @@ const HomeScreen = ({ navigation, theme = 'light', toggleTheme }) => {
   );
 };
 
-//export the constant variable
+//export HomeScreen as a external module for referencing
 export default HomeScreen;

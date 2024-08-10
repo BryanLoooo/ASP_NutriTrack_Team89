@@ -1,10 +1,14 @@
-// Food.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 
-const styles = StyleSheet.create ({
+// Food.js
+//import libraries
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+
+//Stylesheet
+const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     backgroundColor: '#fff',
   },
   label: {
@@ -50,34 +54,9 @@ const styles = StyleSheet.create ({
     borderWidth: 1,
     paddingHorizontal: 10,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderColor: '#e0e0e0',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: 0,
-  },
-  footerButton: {
-    alignItems: 'center',
-  },
-  footerButtonIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: 5,
-  },
-  footerButtonText: {
-    fontSize: 12,
-  },
 });
 
-const FoodScreen = ({ navigation }) => {
-
+const FoodScreen = () => {
   const [query, setQuery] = useState('');
   const [foods, setFoods] = useState([]);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -136,96 +115,73 @@ const FoodScreen = ({ navigation }) => {
   }, [grams]);
 
   return (
-     <View style={styles.container}>
-      <Text style={styles.label}>Search for food</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter food name"
-        value={query}
-        onChangeText={setQuery}
-      />
-      {selectedFood ? (
-        <View style={styles.foodDetails}>
-          <Text style={styles.foodName}>{selectedFood.description}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter grams"
-            value={grams}
-            onChangeText={setGrams}
-            keyboardType="numeric"
-          />
-          <View style={styles.macroContainer}>
-            <View style={styles.macro}>
-              <Text style={styles.macroLabel}>Carbs</Text>
-              <TextInput
-                style={styles.macroInput}
-                value={carbs}
-                editable={false}
-              />
-            </View>
-            <View style={styles.macro}>
-              <Text style={styles.macroLabel}>Fats</Text>
-              <TextInput
-                style={styles.macroInput}
-                value={fats}
-                editable={false}
-              />
-            </View>
-            <View style={styles.macro}>
-              <Text style={styles.macroLabel}>Protein</Text>
-              <TextInput
-                style={styles.macroInput}
-                value={protein}
-                editable={false}
-              />
-            </View>
-            <View style={styles.macro}>
-              <Text style={styles.macroLabel}>Total calories</Text>
-              <TextInput
-                style={styles.macroInput}
-                value={calories}
-                editable={false}
-              />
-            </View>
-          </View>
-          <Button title="Back to Search" onPress={() => setSelectedFood(null)} />
-        </View>
-      ) : (
-        <FlatList
-          data={foods}
-          keyExtractor={(item) => item.fdcId.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.foodItem} onPress={() => selectFood(item)}>
-              <Text style={styles.foodName}>{item.description}</Text>
-            </TouchableOpacity>
-          )}
+    <View style={styles.container}>
+    <Text style={styles.label}>Search for food</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="Enter food name"
+      value={query}
+      onChangeText={setQuery}
+    />
+    {selectedFood ? (
+      <View style={styles.foodDetails}>
+        <Text style={styles.foodName}>{selectedFood.description}</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter grams"
+          value={grams}
+          onChangeText={setGrams}
+          keyboardType="numeric"
         />
-      )}
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Feedback')}>
-          <Image source={require('../../project/my-app/assets/Feedback.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Feedback</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Articles')}>
-          <Image source={require('../../project/my-app/assets/Articles.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Article</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
-          <Image source={require('../../project/my-app/assets/Home.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Social')}>
-          <Image source={require('../../project/my-app/assets/Social.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Social</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Food')}>
-          <Image source={require('../../project/my-app/assets/Food.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Food</Text>
-        </TouchableOpacity>
+        <View style={styles.macroContainer}>
+          <View style={styles.macro}>
+            <Text style={styles.macroLabel}>Carbs</Text>
+            <TextInput
+              style={styles.macroInput}
+              value={carbs}
+              editable={false}
+            />
+          </View>
+          <View style={styles.macro}>
+            <Text style={styles.macroLabel}>Fats</Text>
+            <TextInput
+              style={styles.macroInput}
+              value={fats}
+              editable={false}
+            />
+          </View>
+          <View style={styles.macro}>
+            <Text style={styles.macroLabel}>Protein</Text>
+            <TextInput
+              style={styles.macroInput}
+              value={protein}
+              editable={false}
+            />
+          </View>
+          <View style={styles.macro}>
+            <Text style={styles.macroLabel}>Total calories</Text>
+            <TextInput
+              style={styles.macroInput}
+              value={calories}
+              editable={false}
+            />
+          </View>
+        </View>
+        <Button title="Back to Search" onPress={() => setSelectedFood(null)} />
       </View>
-    </View>
-  );
+    ) : (
+      <FlatList
+        data={foods}
+        keyExtractor={(item) => item.fdcId.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.foodItem} onPress={() => selectFood(item)}>
+            <Text style={styles.foodName}>{item.description}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    )}
+  </View>
+);
 };
-
+//export FoodScreen as a external module for referencing
 export default FoodScreen;

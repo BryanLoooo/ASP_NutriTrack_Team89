@@ -1,14 +1,17 @@
 
 //import libraries
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, Button, StyleSheet, Modal, TouchableOpacity, Image, SafeAreaView} from 'react-native';
 import axios from 'axios';
 import { WebView } from 'react-native-webview';
+import { ScrollView } from 'react-native-gesture-handler';
+//import { SafeAreaView } from 'react-native-safe-area-context';
 
 //stylesheet
 const styles = StyleSheet.create({
-  container: {
+  containerInner: {
     flex: 1,
+    padding: 20,
   },
   itemContainer: {
     padding: 10,
@@ -177,6 +180,7 @@ const Social = ({ navigation }) => {
 
   //user interface elements
   return (
+    <SafeAreaView style={styles.container}>
     <View style={styles.container}>
       <Text>Groups:</Text>
       <FlatList
@@ -228,6 +232,7 @@ const Social = ({ navigation }) => {
           )}
         </View>
       </Modal>
+      </View>
       <View style={styles.footer}>
         <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Feedback')}>
           <Image source={require('../../project/my-app/assets/Feedback.png')} style={styles.footerButtonIcon} />
@@ -250,11 +255,11 @@ const Social = ({ navigation }) => {
           <Text style={styles.footerButtonText}>Food</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
-//export the constant variable
+//export Social as a external module for referencing
 export default Social;
 
 //===========================================================================
