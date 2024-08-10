@@ -75,7 +75,7 @@ const ArticlesScreen = ({ navigation }) => {
   const [articles, setArticles] = useState([]);
 
   const URL =
-    "https://api.thenewsapi.com/v1/news/all?api_token=pP8Y5NTCGT4yRW0p9ka3uUa12yvmA0H79U8aC7Iz&search=calories+countArti";
+    "https://api.thenewsapi.com/v1/news/all?api_token=pP8Y5NTCGT4yRW0p9ka3uUa12yvmA0H79U8aC7Iz&search=calories+count";
 
   useEffect(() => {
     const fetchData = async () => {
