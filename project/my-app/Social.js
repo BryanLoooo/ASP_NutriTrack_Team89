@@ -5,7 +5,6 @@ import { View, Text, FlatList, Button, StyleSheet, Modal, TouchableOpacity, Imag
 import axios from 'axios';
 import { WebView } from 'react-native-webview';
 import { ScrollView } from 'react-native-gesture-handler';
-//import { SafeAreaView } from 'react-native-safe-area-context';
 
 //stylesheet
 const styles = StyleSheet.create({

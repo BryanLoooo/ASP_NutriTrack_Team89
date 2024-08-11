@@ -1,13 +1,120 @@
 
-//Feedback.js
-//import libraries
+// //Feedback.js
+// //import libraries
+// import React, { useState } from 'react';
+// import { View, Text, Button, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
+// import { addFeedback } from './firebaseConfig';
+// import { ScrollView } from 'react-native-gesture-handler';
+
+
+
+// //constant variable decleration
+// const FeedbackForm = ({ navigation }) => {
+
+//   const [feedback, setFeedback] = useState('');
+//   const [submitted, setSubmitted] = useState(false);
+//   const [error, setError] = useState('');
+
+//   const handleSubmit = async () => {
+//     if (feedback.trim()) {
+//       try {
+//         await addFeedback(feedback);
+//         // check if feedback is submitted
+//         console.log('Submitted feedback:', feedback);
+//         setFeedback('');
+//         setError('');
+//         setSubmitted(true);
+//       } 
+//       catch (error) {
+//         console.error('Error submitting feedback:', error);
+//         setError('Error submitting feedback. Please try again.');
+//       }
+//     } 
+//     // if empty feedback
+//     else {
+//       setError('Feedback cannot be empty.');
+//     }
+//   };
+
+//   return (
+//     <ScrollView style={styles.container}>
+//       <View style={styles.containerInner}>
+//         {submitted ? (
+//           <SubmittedFeedback />
+//         ) : (
+//           <View style={styles.formContainer}>
+//             <Text style={styles.title}>Feedback</Text>
+//             <TextInput
+//               placeholder="Enter your feedback"
+//               style={styles.input}
+//               value={feedback}
+//               onChangeText={setFeedback}
+//             />
+//             {error ? <Text style={styles.error}>{error}</Text> : null}
+//             <Button title="Submit Feedback" onPress={handleSubmit} />
+//           </View>
+//         )}
+//       </View>
+//         <View style={styles.footer}>
+//           <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Feedback')}>
+//             <Image source={require('../../project/my-app/assets/Feedback.png')} style={styles.footerButtonIcon} />
+//             <Text style={styles.footerButtonText}>Feedback</Text>
+//           </TouchableOpacity>
+          
+//           <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Articles')}>
+//             <Image source={require('../../project/my-app/assets/Articles.png')} style={styles.footerButtonIcon} />
+//             <Text style={styles.footerButtonText}>Article</Text>
+//           </TouchableOpacity>
+
+//           <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
+//             <Image source={require('../../project/my-app/assets/Home.png')} style={styles.footerButtonIcon} />
+//             <Text style={styles.footerButtonText}>Home</Text>
+//           </TouchableOpacity>
+
+//           <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Social')}>
+//             <Image source={require('../../project/my-app/assets/Social.png')} style={styles.footerButtonIcon} />
+//             <Text style={styles.footerButtonText}>Social</Text>
+//           </TouchableOpacity>
+
+//           <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Food')}>
+//             <Image source={require('../../project/my-app/assets/Food.png')} style={styles.footerButtonIcon} />
+//             <Text style={styles.footerButtonText}>Food</Text>
+//           </TouchableOpacity>
+
+//         </View>
+//     </ScrollView>
+//   );
+// };
+
+// const SubmittedFeedback = () => (
+
+//   <View style={styles.submittedContainer}>
+//     <Text style={styles.submittedText}>Thank you for your feedback!</Text>
+//   </View>
+// );
+
+// //export FeedbackForm as a external module for referencing
+// export default FeedbackForm;
+
+
 import React, { useState } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { addFeedback } from './firebaseConfig';
 import { ScrollView } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
+
 
 //Stylesheet
 const styles = StyleSheet.create({
+
+  starContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  star: {
+    marginRight: 5,
+  },
+
   containerInner: {
     flex: 1,
     padding: 20,
@@ -67,32 +174,40 @@ const styles = StyleSheet.create({
   },
 });
 
-//constant variable decleration
 const FeedbackForm = ({ navigation }) => {
-
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [rating, setRating] = useState(0);
+
 
   const handleSubmit = async () => {
-    if (feedback.trim()) {
+    //make sure feedback is not empty and rating is greater than 0
+    if (feedback.trim() && rating > 0) {
       try {
-        await addFeedback(feedback);
-        // check if feedback is submitted
-        console.log('Submitted feedback:', feedback);
+        await addFeedback({ feedback, rating });
+        // check if the feedback is received
+        console.log('Submitted feedback:', feedback, 'Rating:', rating);
+        // reset the feedback input field and rating to their initial states after its submitted
         setFeedback('');
+        setRating(0);
         setError('');
         setSubmitted(true);
-      } 
+      }
       catch (error) {
-        console.error('Error submitting feedback:', error);
         setError('Error submitting feedback. Please try again.');
       }
     } 
-    // if empty feedback
-    else {
-      setError('Feedback cannot be empty.');
+    else 
+    {
+      // if feedback or rating is missing, set an error message
+      setError('Feedback and rating cannot be empty.');
     }
+  };
+  
+
+  const handleRatingPress = (newRating) => {
+    setRating(newRating);
   };
 
   return (
@@ -109,48 +224,35 @@ const FeedbackForm = ({ navigation }) => {
               value={feedback}
               onChangeText={setFeedback}
             />
+            <View style={styles.starContainer}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity
+                  key={star}
+                  onPress={() => handleRatingPress(star)}
+                  style={styles.star}
+                >
+                  <Ionicons
+                    name={star <= rating ? 'star' : 'star-outline'}
+                    size={20}
+                    color="#e4d415"
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <Button title="Submit Feedback" onPress={handleSubmit} />
           </View>
         )}
       </View>
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Feedback')}>
-            <Image source={require('../../project/my-app/assets/Feedback.png')} style={styles.footerButtonIcon} />
-            <Text style={styles.footerButtonText}>Feedback</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Articles')}>
-            <Image source={require('../../project/my-app/assets/Articles.png')} style={styles.footerButtonIcon} />
-            <Text style={styles.footerButtonText}>Article</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
-            <Image source={require('../../project/my-app/assets/Home.png')} style={styles.footerButtonIcon} />
-            <Text style={styles.footerButtonText}>Home</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Social')}>
-            <Image source={require('../../project/my-app/assets/Social.png')} style={styles.footerButtonIcon} />
-            <Text style={styles.footerButtonText}>Social</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Food')}>
-            <Image source={require('../../project/my-app/assets/Food.png')} style={styles.footerButtonIcon} />
-            <Text style={styles.footerButtonText}>Food</Text>
-          </TouchableOpacity>
-
-        </View>
+      {/* ... existing footer code */}
     </ScrollView>
   );
 };
 
 const SubmittedFeedback = () => (
-
   <View style={styles.submittedContainer}>
     <Text style={styles.submittedText}>Thank you for your feedback!</Text>
   </View>
 );
 
-//export FeedbackForm as a external module for referencing
 export default FeedbackForm;

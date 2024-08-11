@@ -1,10 +1,8 @@
 
-
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { doc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
-// Firebase configuration
+// firebase configuration using the apikey
 const firebaseConfig = {
   apiKey: "AIzaSyBPs8N6PeLm5WZRN06a-V69d0-JyfdfE2c",
   authDomain: "feedbackform-5e2f8.firebaseapp.com",
@@ -15,26 +13,22 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
-}
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firestore
 const db = getFirestore(app);
 
-export { db };
-
 // Function to add feedback to Firestore
-export const addFeedback = async (feedback) => {
+export const addFeedback = async (feedbackData) => {
   try {
-    const feedbackId = new Date().getTime().toString()
-    const feedbackDoc = doc(db, 'feedback', feedbackId);
-    await setDoc(feedbackDoc, { feedback });
-  } catch (error) {
-    console.error("Error adding document: ", error);
+    // ref to feedback collection
+    const feedbackCollection = collection(db, 'feedback');
+    // add the feedback document to the "feedback" collection
+    const docRef = await addDoc(feedbackCollection, feedbackData);
+  } 
+  catch (error) {
     throw error;
   }
 };
+
+export { db };
