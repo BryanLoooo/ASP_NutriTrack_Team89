@@ -1,277 +1,304 @@
 
-//import libraries
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Modal, TouchableOpacity, Image, SafeAreaView} from 'react-native';
-import axios from 'axios';
-import { WebView } from 'react-native-webview';
-import { ScrollView } from 'react-native-gesture-handler';
 
-//stylesheet
+import React, { useState } from 'react';
+import { View, Button, Image, TextInput, Text, StyleSheet } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+
+const Social = () => {
+  const [image, setImage] = useState(null);
+  const [caption, setCaption] = useState('');
+  const [showCaptionInput, setShowCaptionInput] = useState(false);
+  const [postSubmitted, setPostSubmitted] = useState(false); // New state to track if post is submitted
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setShowCaptionInput(true);
+    }
+  };
+
+  const handlePost = () => {
+    if (image && caption) {
+      // Handle the post logic, such as uploading to a database or server
+      console.log('Image:', image);
+      console.log('Caption:', caption);
+      setPostSubmitted(true); // Update state to reflect post submission
+    } else {
+      console.log('Please select an image and enter a caption');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      {!postSubmitted ? (
+        !image ? (
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>
+              Welcome to the NutriTrack social page, a space where you can share and explore the health journeys of fellow community members. Start adding yours now!
+            </Text>
+            <View style={styles.buttonContainer}>
+              <Button title="Add" onPress={pickImage} />
+            </View>
+          </View>
+        ) : (
+          <View style={styles.imagePickerContainer}>
+            <Image source={{ uri: image }} style={styles.image} />
+            {showCaptionInput && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Add a caption..."
+                  value={caption}
+                  onChangeText={setCaption}
+                />
+                <Button title="Post" onPress={handlePost} />
+              </>
+            )}
+          </View>
+        )
+      ) : (
+        <View style={styles.postSubmittedContainer}>
+          <Image source={{ uri: image }} style={styles.submittedImage} />
+          <Text style={styles.captionText}>{caption}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  containerInner: {
+  container: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
-  itemContainer: {
-    padding: 10,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#ddd',
+  welcomeContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
-  itemName: {
-    fontWeight: 'bold',
-  },
-  itemDescription: {
-    fontStyle: 'italic',
-  },
-  itemDate: {
-    color: 'gray',
-  },
-  eventsContainer: {
-    marginTop: 20,
-  },
-  eventContainer: {
-    padding: 10,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#ddd',
-  },
-  eventName: {
-    fontWeight: 'bold',
-  },
-  eventDate: {
-    color: 'gray',
-  },
-  eventDescription: {
-    marginTop: 5,
-  },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
+  welcomeText: {
+    fontSize: 17,
     textAlign: 'center',
+    marginBottom: 50,
   },
-  modalContainer: {
-    flex: 1,
-    padding: 20,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderColor: '#e0e0e0',
-    left: 0,
-    right: 0,
+  buttonContainer: {
+    position: 'absolute',
     bottom: 0,
-    top: 0,
+    right: 20,
   },
-  footerButton: {
+  imagePickerContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  footerButtonIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: 5,
+  image: {
+    width: 200,
+    height: 200,
+    marginVertical: 10,
   },
-  footerButtonText: {
-    fontSize: 12,
+  input: {
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
+  },
+  postSubmittedContainer: {
+    flex: 1,
+    justifyContent: 'flex-start', // Align items at the top
+    alignItems: 'center',
+    width: '100%',
+  },
+  submittedImage: {
+    width: '100%',
+    height: 300, // Adjust height as needed
+  },
+  captionText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 10,
+    paddingHorizontal: 20,
   },
 });
 
-//constant variable for external reference
-const Social = ({ navigation }) => {
-  const [groups, setGroups] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedEventUrl, setSelectedEventUrl] = useState(null);
-
-  const initialCategoryIds = [8001, 8002, 8003, 8019];
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const response = await axios.get('https://www.eventbriteapi.com/v3/categories/108/', {
-          headers: {
-            'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-          }
-        });
-        const data = response.data.subcategories;
-
-        const filteredGroups = data
-          .map((subcategory) => ({
-            id: parseInt(subcategory.id, 10),
-            name: { text: subcategory.name_localized },
-            description: { text: subcategory.name_localized },
-            start: { local: new Date().toISOString() }
-          }))
-          .filter((group) => initialCategoryIds.includes(group.id));
-
-        setGroups(filteredGroups);
-      } catch (error) {
-        console.error('Error fetching groups:', error);
-      }
-    };
-
-    fetchGroups();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCategory === 8002) {
-      const fetchEvents = async () => {
-        try {
-          const response1 = await axios.get(`https://www.eventbriteapi.com/v3/venues/204931649/events/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const response2 = await axios.get(`https://www.eventbriteapi.com/v3/events/967519014417/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const data1 = response1.data.events;
-          const data2 = response2.data;
-
-          const formattedEvents1 = data1.map((event) => ({
-            id: event.id,
-            name: { text: event.name.text },
-            start: { local: event.start.local },
-            description: { text: event.description.text },
-            url: event.url // Add URL to the event
-          }));
-
-          const formattedEvents2 = {
-            id: data2.id,
-            name: { text: data2.name.text },
-            start: { local: data2.start.local },
-            description: { text: data2.description.text },
-            url: data2.url // Add URL to the event
-          };
-
-          setEvents([...formattedEvents1, formattedEvents2]);
-        } catch (error) {
-          console.error('Error fetching events:', error);
-        }
-      };
-
-      fetchEvents();
-    } else {
-      setEvents([]);
-    }
-  }, [selectedCategory]);
-
-  const handleBuyTickets = (eventUrl) => {
-    setSelectedEventUrl(eventUrl);
-    setShowModal(true);
-  };
-
-  //user interface elements
-  return (
-    <SafeAreaView style={styles.container}>
-    <View style={styles.container}>
-      <Text>Groups:</Text>
-      <FlatList
-        data={groups}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Button
-              title={`Select ${item.name.text}`}
-              onPress={() => setSelectedCategory(item.id)}
-            />
-            <Text style={styles.itemName}>{item.name.text}</Text>
-            <Text style={styles.itemDate}>{new Date(item.start.local).toLocaleString()}</Text>
-          </View>
-        )}
-      />
-
-      {selectedCategory && (
-        <View style={styles.eventsContainer}>
-          <Text>Events for Selected Category:</Text>
-          <FlatList
-            data={events}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.eventContainer}>
-                <Text style={styles.eventName}>{item.name.text}</Text>
-                <Text style={styles.eventDate}>{new Date(item.start.local).toLocaleString()}</Text>
-                <Text style={styles.eventDescription}>{item.description.text}</Text>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => handleBuyTickets(item.url)}
-                >
-                  <Text style={styles.buttonText}>Buy Tickets</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        </View>
-      )}
-
-      <Modal visible={showModal} animationType="slide">
-        <View style={styles.modalContainer}>
-          <Button title="Close" onPress={() => setShowModal(false)} />
-          {selectedEventUrl && (
-            <WebView
-              source={{ uri: selectedEventUrl }} // Load the full event page
-              style={{ flex: 1 }}
-            />
-          )}
-        </View>
-      </Modal>
-      </View>
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Feedback')}>
-          <Image source={require('../../project/my-app/assets/Feedback.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Feedback</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Articles')}>
-          <Image source={require('../../project/my-app/assets/Articles.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Article</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
-          <Image source={require('../../project/my-app/assets/Home.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Social')}>
-          <Image source={require('../../project/my-app/assets/Social.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Social</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Food')}>
-          <Image source={require('../../project/my-app/assets/Food.png')} style={styles.footerButtonIcon} />
-          <Text style={styles.footerButtonText}>Food</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
-};
-
-//export Social as a external module for referencing
 export default Social;
 
-//===========================================================================
-//Sample codes
-// // Social.js
-// import React from 'react';
-// import { View, Text } from 'react-native';
+// import React, { useState, useEffect } from 'react';
+// import { View, Button, Image, TextInput, Text, StyleSheet, FlatList } from 'react-native';
+// import * as ImagePicker from 'expo-image-picker';
+// import { addImagePost, fetchImagePosts } from './firebaseConfig'; // Adjust the import path as necessary
 
-// const SocialScreen = () => {
-//   return (
-//     <View>
-//       <Text>Social Screen</Text>
+// const Social = () => {
+//   const [image, setImage] = useState(null);
+//   const [caption, setCaption] = useState('');
+//   const [showCaptionInput, setShowCaptionInput] = useState(false);
+//   const [postSubmitted, setPostSubmitted] = useState(false);
+//   const [posts, setPosts] = useState([]);
+
+//   useEffect(() => {
+//     // Fetch posts when the component mounts
+//     const loadPosts = async () => {
+//       try {
+//         const fetchedPosts = await fetchImagePosts();
+//         setPosts(fetchedPosts);
+//       } catch (error) {
+//         console.error("Error fetching posts: ", error);
+//       }
+//     };
+//     loadPosts();
+//   }, [postSubmitted]);
+
+//   const pickImage = async () => {
+//     let result = await ImagePicker.launchImageLibraryAsync({
+//       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+//       allowsEditing: true,
+//       aspect: [4, 3],
+//       quality: 1,
+//     });
+
+//     if (!result.canceled) {
+//       setImage(result.assets[0].uri);
+//       setShowCaptionInput(true);
+//     }
+//   };
+
+//   const handlePost = async () => {
+//     if (image && caption) {
+//       try {
+//         await addImagePost({ image, caption });
+//         setPostSubmitted(true);
+//         setImage(null); // Reset image and caption after posting
+//         setCaption('');
+//         setShowCaptionInput(false);
+//       } catch (error) {
+//         console.error("Error adding document: ", error);
+//       }
+//     } else {
+//       console.log('Please select an image and enter a caption');
+//     }
+//   };
+
+//   const renderItem = ({ item }) => (
+//     <View style={styles.postContainer}>
+//       <Image source={{ uri: item.image }} style={styles.submittedImage} />
+//       <Text style={styles.captionText}>{item.caption}</Text>
 //     </View>
 //   );
-// };
-// export default SocialScreen;
+
+//   return (
+//     <View style={styles.container}>
+//       {!postSubmitted ? (
+//         !image ? (
+//           <View style={styles.welcomeContainer}>
+//             <Text style={styles.welcomeText}>
+//               Welcome to the NutriTrack social page, a space where you can share and explore the health journeys of fellow community members. Start adding yours now!
+//             </Text>
+//             <View style={styles.buttonContainer}>
+//               <Button title="Add" onPress={pickImage} />
+//             </View>
+//           </View>
+//         ) : (
+//           <View style={styles.imagePickerContainer}>
+//             <Image source={{ uri: image }} style={styles.image} />
+//             {showCaptionInput && (
+//               <>
+//                 <TextInput
+//                   style={styles.input}
+//                   placeholder="Add a caption..."
+//                   value={caption}
+//                   onChangeText={setCaption}
+//                 />
+//                 <Button title="Post" onPress={handlePost} />
+//               </>
+//             )}
+//           </View>
+//         )
+//       ) : (
+//         <FlatList
+//           data={posts}
+//           renderItem={renderItem}
+//           keyExtractor={(item) => item.id}
+//           contentContainerStyle={styles.postList}
+//         />
+//       )}
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     padding: 20,
+//   },
+//   welcomeContainer: {
+//     position: 'relative',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     width: '100%',
+//   },
+//   welcomeText: {
+//     fontSize: 17,
+//     textAlign: 'center',
+//     marginBottom: 50,
+//   },
+//   buttonContainer: {
+//     position: 'absolute',
+//     bottom: 0,
+//     right: 20,
+//   },
+//   imagePickerContainer: {
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+//   image: {
+//     width: 200,
+//     height: 200,
+//     marginVertical: 10,
+//   },
+//   input: {
+//     width: '100%',
+//     borderColor: '#ccc',
+//     borderWidth: 1,
+//     padding: 10,
+//     marginVertical: 10,
+//     borderRadius: 5,
+//   },
+//   postSubmittedContainer: {
+//     flex: 1,
+//     justifyContent: 'flex-start',
+//     alignItems: 'center',
+//     width: '100%',
+//   },
+//   submittedImage: {
+//     width: '100%',
+//     height: 300,
+//   },
+//   captionText: {
+//     fontSize: 16,
+//     textAlign: 'center',
+//     marginTop: 10,
+//     paddingHorizontal: 20,
+//   },
+//   postContainer: {
+//     marginBottom: 20,
+//     alignItems: 'center',
+//   },
+//   postList: {
+//     width: '100%',
+//     paddingHorizontal: 20,
+//   },
+// });
+
+// export default Social;
