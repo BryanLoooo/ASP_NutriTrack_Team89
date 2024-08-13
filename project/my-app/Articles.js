@@ -1,6 +1,7 @@
 //Article.js
 //import libraries
 import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -66,14 +67,14 @@ const getStyles = (theme) =>
     container: {
       flex: 1,
       padding: 15,
-      paddingBottom: 100,
-      marginBottom: 50,
+      paddingBottom: 110,
+      marginBottom: 45,
       backgroundColor: themes[theme].backgroundColor,
     },
     // Style for individual article containers
     articleContainer: {
       marginBottom: 30,
-      padding: 20,
+      padding: 15,
       borderWidth: 1,
       borderColor: themes[theme].borderColor,
       borderRadius: 5,
@@ -101,6 +102,17 @@ const getStyles = (theme) =>
     linkText: {
       color: themes[theme].linkColor,
       textDecorationLine: "underline",
+      padding: 3,
+    },
+
+    likeButtonImage: {
+      width: 25,
+      height: 25,
+      marginTop: 8,
+      margin: 5,
+    },
+    likeButtonText: {
+      color: themes[theme].textColor,
     },
     // Style for footer navigation bar
     footer: {
@@ -109,9 +121,9 @@ const getStyles = (theme) =>
       justifyContent: "space-around",
       alignItems: "center",
       padding: 10,
-      backgroundColor: themes.light.backgroundColor,
+      backgroundColor: themes[theme].backgroundColor,
       borderTopWidth: 1,
-      borderColor: themes.light.borderColor,
+      borderColor: themes[theme].borderColor,
       left: 0,
       right: 0,
       bottom: 0,
@@ -122,14 +134,14 @@ const getStyles = (theme) =>
     },
     // Style for icons within footer buttons
     footerButtonIcon: {
-      width: 24,
-      height: 24,
+      width: 28,
+      height: 28,
       marginBottom: 5,
     },
     // Text style for footer buttons
     footerButtonText: {
       fontSize: 12,
-      color: themes.light.textColor,
+      color: themes[theme].textColor,
     },
   });
 
@@ -144,6 +156,22 @@ const ArticlesScreen = ({ navigation }) => {
   const [articles, setArticles] = useState([]); // State for storing articles
   const [isLoading, setIsLoading] = useState(true); // State to manage loading status
 
+  const handleLike = async (articleUuid) => {
+    const updatedArticles = articles.map((article) => {
+      if (article.uuid === articleUuid) {
+        return { ...article, likes: article.likes + 1 };
+      }
+      return article;
+    });
+
+    try {
+      await AsyncStorage.setItem("articles", JSON.stringify(updatedArticles));
+      setArticles(updatedArticles);
+    } catch (error) {
+      console.error("Error saving articles to local storage: ", error);
+    }
+  };
+
   // URL endpoints for fetching articles
   const URL1 =
     "https://api.thenewsapi.com/v1/news/all?api_token=D4XLcRT7aQVnR41gRqClICAQQGRQyGvje7x5KVnD&search=calories+count";
@@ -153,30 +181,49 @@ const ArticlesScreen = ({ navigation }) => {
 
   // Effect hook for fetching data from APIs
   useEffect(() => {
-    const fetchData = async () => {
+    const loadArticles = async () => {
+      setIsLoading(true);
       try {
-        // Concurrently fetch data from both URLs and handle responses
-        const responses = await Promise.all([fetch(URL1), fetch(URL2)]);
-        const jsonResponses = await Promise.all(
-          responses.map((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP status ${response.status}`);
-            }
-            return response.json();
-          })
-        );
-        // Flatten the fetched data into a single array
-        const fetchedArticles = jsonResponses.flatMap((json) => json.data);
-        setArticles(fetchedArticles);
+        const savedArticles = await AsyncStorage.getItem("articles");
+        if (savedArticles) {
+          setArticles(JSON.parse(savedArticles));
+        } else {
+          // Fetch from API if no data in local storage
+          await fetchDataFromAPI();
+        }
       } catch (error) {
-        console.error("Error fetching data: ", error);
+        console.error("Error loading articles from local storage: ", error);
+        // Optionally try fetching from API if local storage fails
+        await fetchDataFromAPI();
       } finally {
-        setIsLoading(false); // Set loading to false once data is fetched
+        setIsLoading(false);
       }
     };
 
-    fetchData();
+    loadArticles();
   }, []);
+
+  const fetchDataFromAPI = async () => {
+    try {
+      const responses = await Promise.all([fetch(URL1), fetch(URL2)]);
+      const jsonResponses = await Promise.all(
+        responses.map((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          return response.json();
+        })
+      );
+      const fetchedArticles = jsonResponses.flatMap((json) =>
+        json.data.map((article) => ({ ...article, likes: 0 }))
+      );
+      setArticles(fetchedArticles);
+      // Save fetched articles to local storage
+      await AsyncStorage.setItem("articles", JSON.stringify(fetchedArticles));
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
 
   // Render loading indicator while data is being fetched
   if (isLoading) {
@@ -216,6 +263,17 @@ const ArticlesScreen = ({ navigation }) => {
             >
               <Text style={styles.linkText}>Read More</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLike(article.uuid)}>
+              <Image
+                source={
+                  theme === "light"
+                    ? require("../../project/my-app/assets/like.png")
+                    : require("../../project/my-app/assets/LikeDarkMode.png")
+                }
+                style={styles.likeButtonImage}
+              />
+            </TouchableOpacity>
+            <Text style={styles.likeButtonText}>{article.likes} likes</Text>
           </View>
         ))}
       </ScrollView>
@@ -227,7 +285,11 @@ const ArticlesScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Feedback")}
         >
           <Image
-            source={require("../../project/my-app/assets/Feedback.png")}
+            source={
+              theme === "light"
+                ? require("../../project/my-app/assets/Feedback.png")
+                : require("../../project/my-app/assets/FeedbackDark.png")
+            }
             style={styles.footerButtonIcon}
           />
           <Text style={styles.footerButtonText}>Feedback</Text>
@@ -237,7 +299,11 @@ const ArticlesScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Articles")}
         >
           <Image
-            source={require("../../project/my-app/assets/Articles.png")}
+            source={
+              theme === "light"
+                ? require("../../project/my-app/assets/Articles.png")
+                : require("../../project/my-app/assets/ArticlesDark.png")
+            }
             style={styles.footerButtonIcon}
           />
           <Text style={styles.footerButtonText}>Article</Text>
@@ -247,7 +313,11 @@ const ArticlesScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Home")}
         >
           <Image
-            source={require("../../project/my-app/assets/Home.png")}
+            source={
+              theme === "light"
+                ? require("../../project/my-app/assets/Home.png")
+                : require("../../project/my-app/assets/HomeDark.png")
+            }
             style={styles.footerButtonIcon}
           />
           <Text style={styles.footerButtonText}>Home</Text>
@@ -257,7 +327,11 @@ const ArticlesScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Social")}
         >
           <Image
-            source={require("../../project/my-app/assets/Social.png")}
+            source={
+              theme === "light"
+                ? require("../../project/my-app/assets/Social.png")
+                : require("../../project/my-app/assets/SocialDark.png")
+            }
             style={styles.footerButtonIcon}
           />
           <Text style={styles.footerButtonText}>Social</Text>
@@ -267,7 +341,11 @@ const ArticlesScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Food")}
         >
           <Image
-            source={require("../../project/my-app/assets/Food.png")}
+            source={
+              theme === "light"
+                ? require("../../project/my-app/assets/Food.png")
+                : require("../../project/my-app/assets/FoodDark.png")
+            }
             style={styles.footerButtonIcon}
           />
           <Text style={styles.footerButtonText}>Food</Text>
