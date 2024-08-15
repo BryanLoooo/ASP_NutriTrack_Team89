@@ -12,6 +12,8 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from "react-native";
+import { useTheme } from "./ThemeContext";
+import Footer from "./Footer";
 
 // Define theme settings for light and dark modes
 const themes = {
@@ -114,45 +116,12 @@ const getStyles = (theme) =>
     likeButtonText: {
       color: themes[theme].textColor,
     },
-    // Style for footer navigation bar
-    footer: {
-      position: "absolute",
-      flexDirection: "row",
-      justifyContent: "space-around",
-      alignItems: "center",
-      padding: 10,
-      backgroundColor: themes[theme].backgroundColor,
-      borderTopWidth: 1,
-      borderColor: themes[theme].borderColor,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    },
-    // Style for buttons within the footer
-    footerButton: {
-      alignItems: "center",
-    },
-    // Style for icons within footer buttons
-    footerButtonIcon: {
-      width: 28,
-      height: 28,
-      marginBottom: 5,
-    },
-    // Text style for footer buttons
-    footerButtonText: {
-      fontSize: 12,
-      color: themes[theme].textColor,
-    },
   });
 
 // Main component for displaying articles
 const ArticlesScreen = ({ navigation }) => {
-  const [theme, setTheme] = useState("light"); // State for managing theme
+  const { theme, toggleTheme } = useTheme();
   const styles = getStyles(theme); // Get styles based on the current theme
-  // Function to toggle theme
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
   const [articles, setArticles] = useState([]); // State for storing articles
   const [isLoading, setIsLoading] = useState(true); // State to manage loading status
 
@@ -279,78 +248,7 @@ const ArticlesScreen = ({ navigation }) => {
       </ScrollView>
 
       <Text>Article</Text>
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.footerButton}
-          onPress={() => navigation.navigate("Feedback")}
-        >
-          <Image
-            source={
-              theme === "light"
-                ? require("../../project/my-app/assets/Feedback.png")
-                : require("../../project/my-app/assets/FeedbackDark.png")
-            }
-            style={styles.footerButtonIcon}
-          />
-          <Text style={styles.footerButtonText}>Feedback</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.footerButton}
-          onPress={() => navigation.navigate("Articles")}
-        >
-          <Image
-            source={
-              theme === "light"
-                ? require("../../project/my-app/assets/Articles.png")
-                : require("../../project/my-app/assets/ArticlesDark.png")
-            }
-            style={styles.footerButtonIcon}
-          />
-          <Text style={styles.footerButtonText}>Article</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.footerButton}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Image
-            source={
-              theme === "light"
-                ? require("../../project/my-app/assets/Home.png")
-                : require("../../project/my-app/assets/HomeDark.png")
-            }
-            style={styles.footerButtonIcon}
-          />
-          <Text style={styles.footerButtonText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.footerButton}
-          onPress={() => navigation.navigate("Social")}
-        >
-          <Image
-            source={
-              theme === "light"
-                ? require("../../project/my-app/assets/Social.png")
-                : require("../../project/my-app/assets/SocialDark.png")
-            }
-            style={styles.footerButtonIcon}
-          />
-          <Text style={styles.footerButtonText}>Social</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.footerButton}
-          onPress={() => navigation.navigate("Food")}
-        >
-          <Image
-            source={
-              theme === "light"
-                ? require("../../project/my-app/assets/Food.png")
-                : require("../../project/my-app/assets/FoodDark.png")
-            }
-            style={styles.footerButtonIcon}
-          />
-          <Text style={styles.footerButtonText}>Food</Text>
-        </TouchableOpacity>
-      </View>
+      <Footer theme={theme} navigation={navigation} />
     </SafeAreaView>
   );
 };
