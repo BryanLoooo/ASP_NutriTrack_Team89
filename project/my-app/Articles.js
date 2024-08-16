@@ -1,7 +1,6 @@
 //Article.js
 //import libraries
 import React, { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
@@ -10,216 +9,91 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
-  ActivityIndicator,
 } from "react-native";
-import { useTheme } from "./ThemeContext";
-import Footer from "./Footer";
 
-// Define theme settings for light and dark modes
-const themes = {
-  light: {
-    backgroundColor: "#fff",
-    textColor: "#333",
+//Stylesheet
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    paddingBottom: 100,
+    marginBottom: 80,
+  },
+  articleContainer: {
+    marginBottom: 30,
+    padding: 10,
+    borderWidth: 1,
     borderColor: "#ccc",
-    linkColor: "blue",
+    borderRadius: 5,
   },
-  dark: {
-    backgroundColor: "#333",
-    textColor: "#fff",
-    borderColor: "#888",
-    linkColor: "lightblue",
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
-};
+  description: {
+    fontSize: 14,
+    color: "#666",
+    marginVertical: 5,
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  linkText: {
+    color: "blue",
+    textDecorationLine: "underline",
+  },
+  footer: {
+    position: "absolute",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderColor: "#e0e0e0",
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  footerButton: {
+    alignItems: "center",
+  },
+  footerButtonIcon: {
+    width: 24,
+    height: 24,
+    marginBottom: 5,
+  },
+  footerButtonText: {
+    fontSize: 12,
+  },
+});
 
-// Dynamic stylesheet function that adjusts styles based on the current theme
-const getStyles = (theme) =>
-  StyleSheet.create({
-    // Styles for loading container with centered content
-    loadingContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    // Container for theme toggle button
-    themeButtonContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingBottom: 10,
-    },
-    // Button for toggling theme
-    themeButton: {
-      padding: 10,
-      borderRadius: 10,
-    },
-    // Text style for theme button
-    themeButtonText: {
-      fontSize: 30,
-      fontWeight: "bold",
-      paddingLeft: 10,
-      color: themes[theme].textColor,
-    },
-    // Style for theme button image
-    themeButtonImage: {
-      width: 24,
-      height: 24,
-      resizeMode: "contain",
-    },
-    // Main container style that applies theme background color
-    container: {
-      flex: 1,
-      padding: 15,
-      paddingBottom: 110,
-      marginBottom: 45,
-      backgroundColor: themes[theme].backgroundColor,
-    },
-    // Style for individual article containers
-    articleContainer: {
-      marginBottom: 30,
-      padding: 15,
-      borderWidth: 1,
-      borderColor: themes[theme].borderColor,
-      borderRadius: 5,
-    },
-    // Style for article titles
-    title: {
-      fontSize: 18,
-      fontWeight: "bold",
-      color: themes[theme].textColor,
-    },
-    // Style for article descriptions
-    description: {
-      fontSize: 14,
-      color: themes[theme].textColor,
-      marginVertical: 5,
-    },
-    // Style for article images
-    image: {
-      width: "100%",
-      height: 200,
-      borderRadius: 5,
-      marginVertical: 5,
-    },
-    // Style for links within articles
-    linkText: {
-      color: themes[theme].linkColor,
-      textDecorationLine: "underline",
-      padding: 3,
-    },
-
-    likeButtonImage: {
-      width: 25,
-      height: 25,
-      marginTop: 8,
-      margin: 5,
-    },
-    likeButtonText: {
-      color: themes[theme].textColor,
-    },
-  });
-
-// Main component for displaying articles
 const ArticlesScreen = ({ navigation }) => {
-  const { theme, toggleTheme } = useTheme();
-  const styles = getStyles(theme); // Get styles based on the current theme
-  const [articles, setArticles] = useState([]); // State for storing articles
-  const [isLoading, setIsLoading] = useState(true); // State to manage loading status
+  const [articles, setArticles] = useState([]);
 
-  const handleLike = async (articleUuid) => {
-    const updatedArticles = articles.map((article) => {
-      if (article.uuid === articleUuid) {
-        return { ...article, likes: article.likes + 1 };
-      }
-      return article;
-    });
+  const URL =
+    "https://api.thenewsapi.com/v1/news/all?api_token=pP8Y5NTCGT4yRW0p9ka3uUa12yvmA0H79U8aC7Iz&search=calories+count";
 
-    try {
-      await AsyncStorage.setItem("articles", JSON.stringify(updatedArticles));
-      setArticles(updatedArticles);
-    } catch (error) {
-      console.error("Error saving articles to local storage: ", error);
-    }
-  };
-
-  // URL endpoints for fetching articles
-  const URL1 =
-    "https://api.thenewsapi.com/v1/news/all?api_token=D4XLcRT7aQVnR41gRqClICAQQGRQyGvje7x5KVnD&search=calories+count";
-
-  const URL2 =
-    "https://api.thenewsapi.com/v1/news/all?api_token=D4XLcRT7aQVnR41gRqClICAQQGRQyGvje7x5KVnD&search=healthy+lifestyle";
-
-  // Effect hook for fetching data from APIs
   useEffect(() => {
-    const loadArticles = async () => {
-      setIsLoading(true);
+    const fetchData = async () => {
       try {
-        const savedArticles = await AsyncStorage.getItem("articles");
-        if (savedArticles) {
-          setArticles(JSON.parse(savedArticles));
-        } else {
-          // Fetch from API if no data in local storage
-          await fetchDataFromAPI();
-        }
+        const response = await fetch(URL);
+        const json = await response.json();
+        setArticles(json.data); // Assuming the data is in the 'data' field of the JSON
       } catch (error) {
-        console.error("Error loading articles from local storage: ", error);
-        // Optionally try fetching from API if local storage fails
-        await fetchDataFromAPI();
-      } finally {
-        setIsLoading(false);
+        console.error("Error fetching data: ", error);
       }
     };
 
-    loadArticles();
+    fetchData();
   }, []);
 
-  const fetchDataFromAPI = async () => {
-    try {
-      const responses = await Promise.all([fetch(URL1), fetch(URL2)]);
-      const jsonResponses = await Promise.all(
-        responses.map((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
-          }
-          return response.json();
-        })
-      );
-      const fetchedArticles = jsonResponses.flatMap((json) =>
-        json.data.map((article) => ({ ...article, likes: 0 }))
-      );
-      setArticles(fetchedArticles);
-      // Save fetched articles to local storage
-      await AsyncStorage.setItem("articles", JSON.stringify(fetchedArticles));
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-    }
-  };
-
-  // Render loading indicator while data is being fetched
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  // Main component rendering
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-        <View style={styles.themeButtonContainer}>
-          <Text style={styles.themeButtonText}>Top Articles</Text>
-          <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
-            <Image
-              style={styles.themeButtonImage}
-              source={
-                theme === "light"
-                  ? require("../../project/my-app/assets/Sun.png")
-                  : require("../../project/my-app/assets/Moon.png")
-              }
-            />
-          </TouchableOpacity>
-        </View>
         {articles.map((article) => (
           <View key={article.uuid} style={styles.articleContainer}>
             <Text style={styles.title}>{article.title}</Text>
@@ -232,26 +106,65 @@ const ArticlesScreen = ({ navigation }) => {
             >
               <Text style={styles.linkText}>Read More</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleLike(article.uuid)}>
-              <Image
-                source={
-                  theme === "light"
-                    ? require("../../project/my-app/assets/like.png")
-                    : require("../../project/my-app/assets/LikeDarkMode.png")
-                }
-                style={styles.likeButtonImage}
-              />
-            </TouchableOpacity>
-            <Text style={styles.likeButtonText}>{article.likes} likes</Text>
           </View>
         ))}
       </ScrollView>
 
       <Text>Article</Text>
-      <Footer theme={theme} navigation={navigation} />
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.footerButton}
+          onPress={() => navigation.navigate("Feedback")}
+        >
+          <Image
+            source={require("../../project/my-app/assets/Feedback.png")}
+            style={styles.footerButtonIcon}
+          />
+          <Text style={styles.footerButtonText}>Feedback</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerButton}
+          onPress={() => navigation.navigate("Articles")}
+        >
+          <Image
+            source={require("../../project/my-app/assets/Articles.png")}
+            style={styles.footerButtonIcon}
+          />
+          <Text style={styles.footerButtonText}>Article</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerButton}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Image
+            source={require("../../project/my-app/assets/Home.png")}
+            style={styles.footerButtonIcon}
+          />
+          <Text style={styles.footerButtonText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerButton}
+          onPress={() => navigation.navigate("Social")}
+        >
+          <Image
+            source={require("../../project/my-app/assets/Social.png")}
+            style={styles.footerButtonIcon}
+          />
+          <Text style={styles.footerButtonText}>Social</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerButton}
+          onPress={() => navigation.navigate("Food")}
+        >
+          <Image
+            source={require("../../project/my-app/assets/Food.png")}
+            style={styles.footerButtonIcon}
+          />
+          <Text style={styles.footerButtonText}>Food</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
-
-//export ArticleScreen as an external module for referencing in other parts of the app
+//export ArticleScreen as an external module for referencing
 export default ArticlesScreen;
