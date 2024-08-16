@@ -73,7 +73,7 @@ or
 ```
 npm expo start
 ```
-**Take note that you still might have to comment out user authentication related pages when running npm expo start as there might be errors**
+**Take note that you still might have to comment out user authentication related pages when running `npm expo start` as there might be errors**
 
 This will start the Expo development server and provide you with options to run the app on various platforms (iOS simulator, Android emulator, or web).
 
