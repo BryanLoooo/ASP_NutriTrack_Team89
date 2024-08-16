@@ -4,11 +4,11 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { initializeApp } from "@react-native-firebase/app";
+import { ThemeProvider } from "./ThemeContext";
 
 //import external module for navigation
 import HomeScreen2 from "./Home";
 import FeedbackScreen from "./Feedback";
-import ArticlesScreen from "./Articles";
 import Social from "./Social";
 import FoodScreen from "./Food";
 import app from "./utils/firebase";
@@ -22,6 +22,7 @@ const Stack = createStackNavigator();
 
 const App = () => {
   return (
+    <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="HOME" component={HomeScreen} />
@@ -43,6 +44,7 @@ const App = () => {
         <Stack.Screen name="Food" component={FoodScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+    </ThemeProvider>
   );
 };
 
