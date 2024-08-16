@@ -1,2 +1,89 @@
 # ASP_NutriTrack_Team89
 NutriTrack provides daily calorie tracking and suggests recommended exercises for various kinds of users 
+
+## Getting Started
+
+This project uses Expo for development. To run the project, please use the following command:
+
+```
+npm expo start
+
+```
+or
+
+```
+npm expo run
+
+```
+To test the application in it's development with native features (such as the login/sign up functions.)
+
+### Important Note
+
+Please use `npm expo run` instead of other commands like `npm start` or `expo start`. This ensures that the project runs correctly with all necessary configurations as Firebase's User Authentication only works in a development build/native environment. If you wish to run the command `npm expo run`, you will need to set this up by configuring an AVD (Android Virtual Device), which can be done by downloading Android Studio and installing the neccessary SDK and tools. If you do not wish to go through this process, just **comment out the login and sign up pages in App.js**.
+
+## Setting Up an Android Virtual Device (AVD)
+
+To run your React Native app using `npx expo run` on an Android emulator, follow these steps:
+
+### 1. Install Android Studio
+
+- **Download and Install**: Get Android Studio from the [official site](https://developer.android.com/studio) and follow the installation instructions for your OS.
+- **Install SDK and Tools**: Ensure you select to install the Android SDK, Android SDK Platform, and Android Virtual Device (AVD) during installation.
+
+### 2. Configure Android Studio for AVD
+
+1. **Open Android Studio**:
+   Launch Android Studio on your machine.
+
+2. **Configure SDK**:
+   - Go to `File` > `Settings` (or `Android Studio` > `Preferences` on macOS).
+   - Navigate to `Appearance & Behavior` > `System Settings` > `Android SDK`.
+   - Ensure you have Android SDK 34 installed (not 35!), including `Android SDK Platform-Tools` and `Android SDK Build-Tools`.
+
+3. **Set Up AVD**:
+   - Go to `Tools` > `AVD Manager`.
+   - Click on `Create Virtual Device`.
+   - Choose a device model (e.g., Pixel 4).
+   - Select a system image (e.g., Android 13.0). Download it if necessary.
+   - Click `Next`, then `Finish` to create the AVD.
+
+## Prerequisites
+
+Make sure you have the following installed:
+- Node.js
+- npm (Node Package Manager)
+- Expo CLI
+
+## Installation
+
+1. Clone the repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```
+   npm install
+   ```
+
+## Running the Project
+
+To start the project, run:
+
+```
+npm expo run
+```
+or
+
+```
+npm expo start
+```
+**Take note that you still might have to comment out user authentication related pages when running npm expo start as there might be errors**
+
+This will start the Expo development server and provide you with options to run the app on various platforms (iOS simulator, Android emulator, or web).
+
+## Testing Login
+
+To test the login functionality, you can use the following credentials:
+
+- Email: test@gmail.com
+- Password: 123456
+
+Alternatively, you can create a new account entirely.
