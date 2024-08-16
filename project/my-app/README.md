@@ -10,7 +10,7 @@ npm expo run
 
 ### Important Note
 
-Please use `npm expo run` instead of other commands like `npm start` or `expo start`. This ensures that the project runs correctly with all necessary configurations.
+Please use `npm expo run` instead of other commands like `npm start` or `expo start`. This ensures that the project runs correctly with all necessary configurations as Firebase's User Authentication only works in a development build/native environment. If you wish to run the command `npm expo run`, you will need to set this up by configuring an AVD (Android Virtual Device), which can be done by downloading Android Studio and installing the neccessary SDK and tools. If you do not wish to go through this process, just **comment out the login and sign up pages in App.js**.
 
 ## Prerequisites
 

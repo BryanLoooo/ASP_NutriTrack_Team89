@@ -17,6 +17,7 @@ import ArticleWebView from "./ArticleWebView";
 import HomeScreen from "./HomeScreen";
 import LoginScreen from "./LoginScreen";
 import SignupScreen from "./SignupScreen";
+import ArticlesScreen from "./Articles";
 
 const Stack = createStackNavigator();
 
