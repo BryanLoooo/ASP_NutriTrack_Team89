@@ -7,13 +7,11 @@ This project uses Expo for development. To run the project, please use the follo
 
 ```
 npm expo start
-
 ```
 or
 
 ```
 npm expo run
-
 ```
 To test the application in it's development with native features (such as the login/sign up functions.)
 
