@@ -2,6 +2,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
+
 // firebase configuration using the apikey
 const firebaseConfig = {
   apiKey: "AIzaSyBPs8N6PeLm5WZRN06a-V69d0-JyfdfE2c",
@@ -18,17 +19,16 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Initialize Firestore
 const db = getFirestore(app);
 
-// Function to add feedback to Firestore
-export const addFeedback = async (feedbackData) => {
+export const addFeedback = async ({ feedback, rating }) => {
   try {
-    // ref to feedback collection
-    const feedbackCollection = collection(db, 'feedback');
-    // add the feedback document to the "feedback" collection
-    const docRef = await addDoc(feedbackCollection, feedbackData);
-  } 
-  catch (error) {
-    throw error;
+    const docRef = await addDoc(collection(db, 'feedback'), {
+      feedback,
+      rating,
+      timestamp: new Date(), 
+    });
+  } catch (error) {
+    throw new Error('Failed to submit feedback');
   }
 };
-
 export { db };
+
