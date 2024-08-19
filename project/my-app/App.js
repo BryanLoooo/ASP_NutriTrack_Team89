@@ -24,27 +24,27 @@ const Stack = createStackNavigator();
 const App = () => {
   return (
     <ThemeProvider>
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="HOME" component={HomeScreen} />
-        <Stack.Screen name="LOGIN" component={LoginScreen} />
-        <Stack.Screen name="SIGNUP" component={SignupScreen} />
-        <Stack.Screen
-          name="Home2"
-          component={HomeScreen2}
-          initialParams={{ theme: "light" }}
-        />
-        <Stack.Screen name="Feedback" component={FeedbackScreen} />
-        <Stack.Screen name="Articles" component={ArticlesScreen} />
-        <Stack.Screen
-          name="WebView"
-          component={ArticleWebView}
-          options={{ headerTitle: "Web View" }}
-        />
-        <Stack.Screen name="Social" component={Social} />
-        <Stack.Screen name="Food" component={FoodScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="HOME" component={HomeScreen} />
+          <Stack.Screen name="LOGIN" component={LoginScreen} />
+          <Stack.Screen name="SIGNUP" component={SignupScreen} />
+          <Stack.Screen
+            name="Home Page"
+            component={HomeScreen2}
+            initialParams={{ theme: "light" }}
+          />
+          <Stack.Screen name="Feedback" component={FeedbackScreen} />
+          <Stack.Screen name="Articles" component={ArticlesScreen} />
+          <Stack.Screen
+            name="WebView"
+            component={ArticleWebView}
+            options={{ headerTitle: "Web View" }}
+          />
+          <Stack.Screen name="Social" component={Social} />
+          <Stack.Screen name="Food" component={FoodScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </ThemeProvider>
   );
 };

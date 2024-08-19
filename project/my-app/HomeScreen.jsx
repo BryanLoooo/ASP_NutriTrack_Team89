@@ -16,12 +16,11 @@ const HomeScreen = () => {
   };
   return (
     <View style={styles.container}>
-      <Image source={require("./assets/logo.png")} style={styles.logo} />
-      <Image source={require("./assets/man.png")} style={styles.bannerImage} />
-      <Text style={styles.title}>Lorem ipsum dolor.</Text>
+      <Image source={require("./assets/logo.jpg")} style={styles.bannerImage} />
+      <Text style={styles.title}>Welcome!</Text>
       <Text style={styles.subTitle}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore 
+        Track your meals, monitor your health, and achieve your wellness goals
+        with ease. Let's get started!
       </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -52,15 +51,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     alignItems: "center",
   },
-  logo: {
-    height: 40,
-    width: 140,
-    marginVertical: 30,
-  },
   bannerImage: {
-    marginVertical: 20,
-    height: 250,
-    width: 231,
+    marginVertical: 30,
+    height: 270,
+    width: 251,
+    marginTop: 100,
   },
   title: {
     fontSize: 40,

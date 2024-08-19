@@ -247,7 +247,7 @@ const ArticlesScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <Text>Article</Text>
+      <Text>Articles</Text>
       <Footer theme={theme} navigation={navigation} />
     </SafeAreaView>
   );

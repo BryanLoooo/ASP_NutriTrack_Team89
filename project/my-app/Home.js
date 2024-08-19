@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen2 = ({ navigation }) => {
   const { theme, toggleTheme } = useTheme();
 
   const [selectedActivity, setSelectedActivity] = useState(null);
@@ -413,7 +413,7 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.footerButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => navigation.navigate("Home Page")}
         >
           <Image
             source={require("../../project/my-app/assets/Home.png")}
@@ -447,4 +447,4 @@ const HomeScreen = ({ navigation }) => {
 };
 
 //export HomeScreen as a external module for referencing
-export default HomeScreen;
+export default HomeScreen2;

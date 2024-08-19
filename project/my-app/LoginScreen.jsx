@@ -20,10 +20,10 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 
-const webClientId = "904819533566-bp32cqandl3bv0jbpc0cdndo4c4rl0je.apps.googleusercontent.com";
-const androidClientId = "904819533566-a6s6ko55ra21pv35kfc0rtcbeg90gpj8.apps.googleusercontent.com";
-
-
+const webClientId =
+  "904819533566-bp32cqandl3bv0jbpc0cdndo4c4rl0je.apps.googleusercontent.com";
+const androidClientId =
+  "904819533566-a6s6ko55ra21pv35kfc0rtcbeg90gpj8.apps.googleusercontent.com";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -34,10 +34,8 @@ const LoginScreen = () => {
 
   const configureGoogleSignIn = () => {
     GoogleSignin.configure({
-      webClientId:
-        webClientId,
-      androidClientId:
-        androidClientId,
+      webClientId: webClientId,
+      androidClientId: androidClientId,
     });
   };
 
@@ -47,20 +45,22 @@ const LoginScreen = () => {
 
   const googleSignIn = async () => {
     console.log("Pressed sign in");
-  
+
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       console.log("Google Sign-In Successful:", userInfo);
-  
+
       // Create a Google credential with the token
-      const googleCredential = auth.GoogleAuthProvider.credential(userInfo.idToken);
-  
+      const googleCredential = auth.GoogleAuthProvider.credential(
+        userInfo.idToken
+      );
+
       // Sign-in the user with the credential
       await auth().signInWithCredential(googleCredential);
-  
-      // Navigate to the Home2 screen
-      navigation.navigate("Home2");
+
+      // Navigate to the Home screen
+      navigation.navigate("Home Page");
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       setError(error.message);
@@ -71,7 +71,7 @@ const LoginScreen = () => {
     try {
       await signIn(email, password);
       // Navigate to the main app screen after successful login
-      navigation.navigate("Home2");
+      navigation.navigate("Home Page");
     } catch (error) {
       setError(error.message);
     }

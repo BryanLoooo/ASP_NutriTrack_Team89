@@ -80,7 +80,7 @@ const Footer = ({ theme, navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.footerButton}
-        onPress={() => navigation.navigate("Home")}
+        onPress={() => navigation.navigate("Home Page")}
       >
         <Image
           source={
