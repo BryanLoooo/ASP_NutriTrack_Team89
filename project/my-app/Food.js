@@ -1,6 +1,6 @@
 // Food.js
 //import libraries
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -67,32 +67,26 @@ const FoodScreen = () => {
   const [query, setQuery] = useState("");
   const [foods, setFoods] = useState([]);
   const [selectedFood, setSelectedFood] = useState(null);
-  const [grams, setGrams] = useState("100");
   const [carbs, setCarbs] = useState("");
   const [fats, setFats] = useState("");
   const [protein, setProtein] = useState("");
   const [calories, setCalories] = useState("");
 
-  const apiKey = "0z0jNkOe70ugdCHlz55RlQgxjTK3S8NxefRmcx3j"; // Replace with your actual API key
-
-  useEffect(() => {
-    if (query.length > 0) {
-      fetchFoodData();
-    } else {
-      setFoods([]);
-    }
-  }, [query]);
+  const appId = "106a2498"; // Replace with your Edamam App ID
+  const apiKey = "d444d58428c68ef47c2f7f97014c0027"; // Replace with your Edamam API Key
 
   const fetchFoodData = async () => {
     try {
       const response = await fetch(
-        `https://api.nal.usda.gov/fdc/v1/foods/search?query=${query}&api_key=${apiKey}`
+        `https://api.edamam.com/api/nutrition-data?app_id=${appId}&app_key=${apiKey}&ingr=${encodeURIComponent(query)}`
       );
+
       if (!response.ok) {
         throw new Error(`HTTP status ${response.status}`);
       }
+
       const data = await response.json();
-      setFoods(data.foods);
+      setFoods([{ ...data, food_name: query }]);
     } catch (error) {
       console.error("Error fetching food data:", error);
     }
@@ -100,68 +94,42 @@ const FoodScreen = () => {
 
   const selectFood = (food) => {
     setSelectedFood(food);
-    setGrams("100");
-    calculateNutrients(food, "100");
+    calculateNutrients(food);
   };
 
-  const calculateNutrients = (food, gramsValue) => {
-    const gramsNum = parseInt(gramsValue, 10) || 100;
-    const carbNutrient = food.foodNutrients.find(
-      (nutrient) => nutrient.nutrientName === "Carbohydrate, by difference"
-    );
-    const fatNutrient = food.foodNutrients.find(
-      (nutrient) => nutrient.nutrientName === "Total lipid (fat)"
-    );
-    const proteinNutrient = food.foodNutrients.find(
-      (nutrient) => nutrient.nutrientName === "Protein"
-    );
-    const caloriesNutrient = food.foodNutrients.find(
-      (nutrient) => nutrient.nutrientName === "Energy"
-    );
+  const calculateNutrients = (food) => {
+    const carbNutrient = food.totalNutrients.CHOCDF ? food.totalNutrients.CHOCDF.quantity : 0;
+    const fatNutrient = food.totalNutrients.FAT ? food.totalNutrients.FAT.quantity : 0;
+    const proteinNutrient = food.totalNutrients.PROCNT ? food.totalNutrients.PROCNT.quantity : 0;
+    const caloriesNutrient = food.calories ? food.calories : 0;
 
-    setCarbs(
-      carbNutrient ? ((carbNutrient.value / 100) * gramsNum).toFixed(1) : "0"
-    );
-    setFats(
-      fatNutrient ? ((fatNutrient.value / 100) * gramsNum).toFixed(1) : "0"
-    );
-    setProtein(
-      proteinNutrient
-        ? ((proteinNutrient.value / 100) * gramsNum).toFixed(1)
-        : "0"
-    );
-    setCalories(
-      caloriesNutrient
-        ? ((caloriesNutrient.value / 100) * gramsNum).toFixed(1)
-        : "0"
-    );
+    setCarbs(carbNutrient.toFixed(1));
+    setFats(fatNutrient.toFixed(1));
+    setProtein(proteinNutrient.toFixed(1));
+    setCalories(caloriesNutrient.toFixed(1));
   };
 
-  useEffect(() => {
-    if (selectedFood) {
-      calculateNutrients(selectedFood, grams);
+  const handleSearch = () => {
+    if (query.length > 0) {
+      fetchFoodData();
+    } else {
+      setFoods([]);
     }
-  }, [grams]);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Search for food</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter food name"
+        placeholder="Eg:100g of chicken thigh"
         value={query}
         onChangeText={setQuery}
       />
+      <Button title="Search" onPress={handleSearch} />
       {selectedFood ? (
         <View style={styles.foodDetails}>
-          <Text style={styles.foodName}>{selectedFood.description}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter grams"
-            value={grams}
-            onChangeText={setGrams}
-            keyboardType="numeric"
-          />
+          <Text style={styles.foodName}>{selectedFood.food_name}</Text>
           <View style={styles.macroContainer}>
             <View style={styles.macro}>
               <Text style={styles.macroLabel}>Carbs</Text>
@@ -204,13 +172,13 @@ const FoodScreen = () => {
       ) : (
         <FlatList
           data={foods}
-          keyExtractor={(item) => item.fdcId.toString()}
+          keyExtractor={(item) => item.food_name}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.foodItem}
               onPress={() => selectFood(item)}
             >
-              <Text style={styles.foodName}>{item.description}</Text>
+              <Text style={styles.foodName}>{item.food_name}</Text>
             </TouchableOpacity>
           )}
         />
@@ -218,5 +186,6 @@ const FoodScreen = () => {
     </View>
   );
 };
-//export FoodScreen as a external module for referencing
+
+//export FoodScreen as an external module for referencing
 export default FoodScreen;
