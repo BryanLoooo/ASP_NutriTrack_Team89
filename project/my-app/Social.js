@@ -1,378 +1,246 @@
 
-	
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Modal, TouchableOpacity, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
-import axios from 'axios';
-import { WebView } from 'react-native-webview';
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, Image, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { getFirestore, collection, query, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { FontAwesome } from '@expo/vector-icons';
+import auth from '@react-native-firebase/auth';
+
+const Social = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [addingPost, setAddingPost] = useState(false);
+  const [image, setImage] = useState(null);
+  const [caption, setCaption] = useState('');
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const db = getFirestore();
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      if (user) {
+        setCurrentUserId(user.uid);
+      }
+    });
+
+    const fetchPosts = async () => {
+      try {
+        const q = query(collection(db, 'socialPagePosts'));
+        const querySnapshot = await getDocs(q);
+        const fetchedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPosts(fetchedPosts);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching posts:', error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+    return () => unsubscribe();
+  }, []);
+
+  const pickImage = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        setAddingPost(true);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+    }
+  };
+
+  const handlePost = async () => {
+    if (image && caption) {
+      try {
+        const docRef = await addDoc(collection(db, 'socialPagePosts'), {
+          image,
+          caption,
+          likes: 0,
+          likedBy: [],
+        });
+
+        const newPost = { id: docRef.id, image, caption, likes: 0, likedBy: [] };
+        setPosts([...posts, newPost]);
+
+        // Reset after posting
+        setCaption('');
+        setImage(null);
+        setAddingPost(false);
+      } catch (error) {
+        console.error('Error saving post:', error.message);
+      }
+    } else {
+      console.log('Please select an image and enter a caption');
+    }
+  };
+
+  const handleLike = async (id, currentLikes, likedBy) => {
+    if (!currentUserId) return;
+
+    let newLikes = currentLikes;
+    let newLikedBy = [...likedBy];
+
+    if (newLikedBy.includes(currentUserId)) {
+      newLikes -= 1;
+      newLikedBy = newLikedBy.filter(userId => userId !== currentUserId);
+    } else {
+      newLikes += 1;
+      newLikedBy.push(currentUserId);
+    }
+
+    await updateDoc(doc(db, 'socialPagePosts', id), {
+      likes: newLikes,
+      likedBy: newLikedBy,
+    });
+
+    setPosts(posts.map(post => post.id === id ? { ...post, likes: newLikes, likedBy: newLikedBy } : post));
+  };
+
+  const isPostLiked = (likedBy) => likedBy.includes(currentUserId);
+
+  return (
+    <View style={styles.container}>
+      {/* Conditionally render welcome text if not adding a post */}
+      {!addingPost && (
+        <View style={[styles.welcomeContainer, posts.length > 0 ? styles.headerWelcome : styles.middleWelcome]}>
+          <Text style={styles.welcomeText}>
+            Welcome to NutriTrack's social page, a space where you can share and explore the health journeys of fellow community members.
+          </Text>
+        </View>
+      )}
+
+      {addingPost ? (
+        <View style={styles.addPostContainer}>
+          {image && <Image source={{ uri: image }} style={styles.image} />}
+          <TextInput
+            style={styles.input}
+            placeholder="Add a caption..."
+            value={caption}
+            onChangeText={setCaption}
+          />
+          <View style={styles.buttonContainer}>
+            <Button title="Cancel" onPress={() => {
+              setAddingPost(false);
+              setImage(null);
+              setCaption('');
+            }} color="red" />
+            <Button title="Post" onPress={handlePost} />
+          </View>
+        </View>
+      ) : (
+        <>
+          {posts.length > 0 && (
+            <FlatList
+              data={posts}
+              renderItem={({ item }) => (
+                <View key={item.id} style={{ marginBottom: 30 }}>
+                  {item.image && <Image source={{ uri: item.image }} style={{ width: '100%', height: 200 }} />}
+                  <Text style={{ marginTop: 15 }}>{item.caption}</Text>
+                  <View style={styles.likeContainer}>
+                    <TouchableOpacity onPress={() => handleLike(item.id, item.likes, item.likedBy)}>
+                      <FontAwesome
+                        name={isPostLiked(item.likedBy) ? 'heart' : 'heart-o'}
+                        size={20}
+                        color={isPostLiked(item.likedBy) ? 'red' : 'black'}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.likeCount}>
+                      {item.likes} {item.likes === 1 ? 'Like' : 'Likes'}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          )}
+
+          {!addingPost && (
+            <TouchableOpacity onPress={pickImage} style={styles.addPostButton}>
+              <Text style={styles.addPostButtonText}>Add Post</Text>
+            </TouchableOpacity>
+          )}
+        </>
+      )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
   },
-  itemContainer: {
-    padding: 10,
-    marginVertical: 8,
+  addPostContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginVertical: 10,
+  },
+  input: {
+    width: '100%',
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#ddd',
-  },
-  itemName: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  itemDate: {
-    color: 'gray',
-    marginBottom: 10,
-  },
-  eventsContainer: {
-    marginTop: 20,
-  },
-  eventContainer: {
     padding: 10,
-    marginVertical: 8,
-    borderWidth: 1,
+    marginVertical: 10,
     borderRadius: 5,
-    borderColor: '#ddd',
   },
-  eventName: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 10,
+  addPostButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#48AAAD',
+    padding: 10,
+    borderRadius: 50,
   },
-  eventDate: {
-    color: 'gray',
-    marginBottom: 10,
-  },
-  eventDescription: {
-    marginBottom: 10,
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#779ECB',
-    borderRadius: 5,
-    width: '40%',
-    marginLeft: '55%'
-  },
-  buttonText: {
+  addPostButtonText: {
     color: '#fff',
-    textAlign: 'center',
     fontSize: 16,
   },
-  modalContainer: {
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  welcomeContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  headerWelcome: {
+    alignItems: 'flex-start',
+  },
+  middleWelcome: {
     flex: 1,
-    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  likeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  likeCount: {
+    color: '#333',
+    marginLeft: 5,
   },
 });
 
-const Social = ({ navigation }) => {
-  const [groups, setGroups] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedEventUrl, setSelectedEventUrl] = useState(null);
-
-  const initialCategoryIds = [8001, 8002, 8003, 8019];
-
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const response = await axios.get('https://www.eventbriteapi.com/v3/categories/108/', {
-          headers: {
-            'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-          }
-        });
-        const data = response.data.subcategories;
-
-        const filteredGroups = data
-          .map((subcategory) => ({
-            id: parseInt(subcategory.id, 10),
-            name: { text: subcategory.name_localized },
-            description: { text: subcategory.name_localized },
-            start: { local: new Date().toISOString() }
-          }))
-          .filter((group) => initialCategoryIds.includes(group.id));
-
-        setGroups(filteredGroups);
-      } catch (error) {
-        console.error('Error fetching groups:', error);
-      }
-    };
-
-    fetchGroups();
-  }, []);
-
-  useEffect(() => {
-    if (selectedCategory === 8001) {
-      const fetchEvents = async () => {
-        try {
-          const response1 = await axios.get(`https://www.eventbriteapi.com/v3/events/967696796167/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-    
-          const response2 = await axios.get(`https://www.eventbriteapi.com/v3/events/906626944597/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const response3 = await axios.get(`https://www.eventbriteapi.com/v3/events/954518208657/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-    
-          const event1 = response1.data;
-          const event2 = response2.data;
-          const event3 = response3.data;
-    
-          // Format the events
-          const formattedEvent1 = {
-            id: event1.id,
-            name: { text: event1.name.text },
-            start: { local: event1.start.local },
-            description: { text: event1.description.text },
-            url: event1.url 
-          };
-    
-          const formattedEvent2 = {
-            id: event2.id,
-            name: { text: event2.name.text },
-            start: { local: event2.start.local },
-            description: { text: event2.description.text },
-            url: event2.url 
-          };
-          const formattedEvent3 = {
-            id: event3.id,
-            name: { text: event3.name.text },
-            start: { local: event3.start.local },
-            description: { text: event3.description.text },
-            url: event3.url 
-          };
-    
-          // Update the events state
-          setEvents([formattedEvent1, formattedEvent2, formattedEvent3]); 
-        } catch (error) {
-          console.error('Error fetching events:', error);
-        }
-      };
-    
-      fetchEvents();
-    }    
-    else if (selectedCategory === 8002) {
-      const fetchEvents = async () => {
-        try {
-          const response1 = await axios.get(`https://www.eventbriteapi.com/v3/venues/204931649/events/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const response2 = await axios.get(`https://www.eventbriteapi.com/v3/events/967519014417/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const data1 = response1.data.events;
-          const data2 = response2.data;
-
-          const formattedEvents1 = data1.map((event) => ({
-            id: event.id,
-            name: { text: event.name.text },
-            start: { local: event.start.local },
-            description: { text: event.description.text },
-            url: event.url 
-          }));
-
-          const formattedEvents2 = {
-            id: data2.id,
-            name: { text: data2.name.text },
-            start: { local: data2.start.local },
-            description: { text: data2.description.text },
-            url: data2.url 
-          };
-
-          setEvents([...formattedEvents1, formattedEvents2]);
-        } catch (error) {
-          console.error('Error fetching events:', error);
-        }
-      };
-
-      fetchEvents();
-    } 
-    
-    else if (selectedCategory === 8003) {
-      const fetchEvents = async () => {
-        try {
-
-          const response1 = await axios.get(`https://www.eventbriteapi.com/v3/events/767497454547/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-          const response2 = await axios.get(`https://www.eventbriteapi.com/v3/events/953401107377/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const data1 = response1.data;
-          const data2 = response2.data;
-
-          const formattedEvent1 = {
-            id: data1.id,
-            name: { text: data1.name.text },
-            start: { local: data1.start.local },
-            description: { text: data1.description.text },
-            url: data1.url 
-          };
-
-          const formattedEvent2 = {
-            id: data2.id,
-            name: { text: data2.name.text },
-            start: { local: data2.start.local },
-            description: { text: data2.description.text },
-            url: data2.url 
-          };
-
-          setEvents([formattedEvent1,formattedEvent2]);
-        } catch (error) {
-          console.error('Error fetching events:', error);
-        }
-      };
-
-      fetchEvents();
-    } 
-    else if (selectedCategory === 8019) {
-      const fetchEvents = async () => {
-        try {
-
-          const response1 = await axios.get(`https://www.eventbriteapi.com/v3/events/883045682407/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-          const response2 = await axios.get(`https://www.eventbriteapi.com/v3/events/965608289387/`, {
-            headers: {
-              'Authorization': `Bearer 6GE6LAXSZUIKENDM34NU`
-            }
-          });
-
-          const data1 = response1.data;
-          const data2 = response2.data;
-
-          const formattedEvent1 = {
-            id: data1.id,
-            name: { text: data1.name.text },
-            start: { local: data1.start.local },
-            description: { text: data1.description.text },
-            url: data1.url 
-          };
-
-          const formattedEvent2 = {
-            id: data2.id,
-            name: { text: data2.name.text },
-            start: { local: data2.start.local },
-            description: { text: data2.description.text },
-            url: data2.url 
-          };
-
-          setEvents([formattedEvent1,formattedEvent2]);
-        } catch (error) {
-          console.error('Error fetching events:', error);
-        }
-      };
-
-      fetchEvents();
-    } 
-    
-    else {
-      setEvents([]);
-    }
-  }, [selectedCategory]);
-
-  const handleBuyTickets = (eventUrl) => {
-    setSelectedEventUrl(eventUrl);
-    setShowModal(true);
-  };
-  const handleOutsidePress = () => {
-    setSelectedCategory(null);
-  };
-
-  return (
-    <TouchableWithoutFeedback onPress={handleOutsidePress}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.container}>
-          <Text>Groups:</Text>
-          <FlatList
-            data={groups}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
-                <View>
-                  <Text style={styles.itemName}>{item.name.text}</Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setSelectedCategory(item.id)}
-                >
-                  <Text style={styles.buttonText}>Select</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-
-          {selectedCategory && (
-            <View style={styles.eventsContainer}>
-              <Text>Events for Selected Category:</Text>
-              <FlatList
-                data={events}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.eventContainer}>
-                    <Text style={styles.eventName}>{item.name.text}</Text>
-                    <Text style={styles.eventDate}>{new Date(item.start.local).toLocaleString()}</Text>
-                    <Text style={styles.eventDescription}>{item.description.text}</Text>
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={() => handleBuyTickets(item.url)}
-                    >
-                      <Text style={styles.buttonText}>Buy Tickets</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              />
-            </View>
-          )}
-
-          <Modal visible={showModal} animationType="slide">
-            <View style={styles.modalContainer}>
-              <Button title="Close" onPress={() => setShowModal(false)} />
-              {selectedEventUrl && (
-                <WebView
-                  source={{ uri: selectedEventUrl }}
-                  style={{ flex: 1 }}
-                />
-              )}
-            </View>
-          </Modal>
-        </View>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
-  );
-};
-
 export default Social;
-
-
-
-
-
-
-
-
