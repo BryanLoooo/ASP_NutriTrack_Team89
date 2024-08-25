@@ -1,6 +1,6 @@
 //Home.js
 //import libraries
-import React, { useState } from "react";
+import React, { useState,  useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "./ThemeContext";
 
 //stylesheet
@@ -185,6 +187,11 @@ const styles = StyleSheet.create({
       resizeMode: "contain",
     },
   },
+  totalNutrients: {
+      fontSize: 18,
+      marginTop: 20,
+      paddingHorizontal: 20,
+    },
 });
 
 const HomeScreen2 = ({ navigation }) => {
@@ -198,6 +205,46 @@ const HomeScreen2 = ({ navigation }) => {
   const [fatConsumed, setFatConsumed] = useState(30);
   const [carbohydrateConsumed, setCarbohydrateConsumed] = useState(625);
 
+  const [totalCarbs, setTotalCarbs] = useState(0);
+    const [totalFats, setTotalFats] = useState(0);
+    const [totalProtein, setTotalProtein] = useState(0);
+    const [totalCalories, setTotalCalories] = useState(0);
+
+ const fetchTotalNutrients = async () => {
+    try {
+      const savedNutrients = await AsyncStorage.getItem("totalNutrients");
+      if (savedNutrients) {
+        const parsedNutrients = JSON.parse(savedNutrients);
+        setTotalCarbs(parsedNutrients.carbs);
+        setTotalFats(parsedNutrients.fats);
+        setTotalProtein(parsedNutrients.protein);
+        setTotalCalories(parsedNutrients.calories);
+      }
+    } catch (error) {
+      console.error("Error retrieving total nutrients data:", error);
+    }
+  };
+
+  useEffect(() => {
+    const resetDataOnStart = async () => {
+      try {
+        await AsyncStorage.removeItem("totalNutrients");
+        console.log("Nutrient data has been reset.");
+      } catch (error) {
+        console.error("Error resetting data:", error);
+      }
+    };
+
+    resetDataOnStart();
+    fetchTotalNutrients();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Refresh the data when the screen is focused
+      fetchTotalNutrients();
+    }, [])
+  );
   const activities = ["Running", "Cycling", "Swimming"];
   const articles = [
     "Article 1",
@@ -390,6 +437,13 @@ const HomeScreen2 = ({ navigation }) => {
           />
         </View>
       </View>
+      <View style={styles.totalNutrients}>
+              <Text>Total Carbs: {totalCarbs}g</Text>
+              <Text>Total Fats: {totalFats}g</Text>
+              <Text>Total Protein: {totalProtein}g</Text>
+              <Text>Total Calories: {totalCalories} cals</Text>
+            </View>
+
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.footerButton}

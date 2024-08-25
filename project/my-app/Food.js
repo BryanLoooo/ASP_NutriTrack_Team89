@@ -1,5 +1,3 @@
-// Food.js
-//import libraries
 import React, { useState } from "react";
 import {
   View,
@@ -10,7 +8,9 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "./ThemeContext";
 import Footer from './Footer.js'; // Adjust the path based on your project structure
 
@@ -138,6 +138,46 @@ const FoodScreen = ({ navigation }) => {
     setCalories(caloriesNutrient.toFixed(1));
   };
 
+ const saveFood = async () => {
+   const currentNutrients = {
+     carbs: parseFloat(carbs),
+     fats: parseFloat(fats),
+     protein: parseFloat(protein),
+     calories: parseFloat(calories),
+   };
+
+   try {
+     const savedNutrients = await AsyncStorage.getItem("totalNutrients");
+     let updatedNutrients = {
+       carbs: 0,
+       fats: 0,
+       protein: 0,
+       calories: 0,
+     };
+
+     if (savedNutrients) {
+       const parsedNutrients = JSON.parse(savedNutrients);
+       updatedNutrients = {
+         carbs: parsedNutrients.carbs + currentNutrients.carbs,
+         fats: parsedNutrients.fats + currentNutrients.fats,
+         protein: parsedNutrients.protein + currentNutrients.protein,
+         calories: parsedNutrients.calories + currentNutrients.calories,
+       };
+     } else {
+       updatedNutrients = currentNutrients;
+     }
+
+     await AsyncStorage.setItem("totalNutrients", JSON.stringify(updatedNutrients));
+
+     // Show success alert
+     Alert.alert("Success", "Food has been saved successfully!");
+
+   } catch (error) {
+     console.error("Error saving food data:", error);
+   }
+ };
+
+
   const handleSearch = () => {
     if (query.length > 0) {
       fetchFoodData();
@@ -195,8 +235,8 @@ const FoodScreen = ({ navigation }) => {
               </View>
             </View>
             <Button
-              title="Back to Search"
-              onPress={() => setSelectedFood(null)}
+              title="Save Food"
+              onPress={saveFood}
             />
           </View>
         ) : (
