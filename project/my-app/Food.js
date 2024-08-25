@@ -10,8 +10,8 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "./ThemeContext";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage for local storage
+import { useTheme } from "./ThemeContext"; // Import custom ThemeContext for theming
 import Footer from './Footer.js'; // Adjust the path based on your project structure
 
 // Define theme settings for light and dark modes
@@ -21,12 +21,14 @@ const themes = {
     textColor: "#333",
     borderColor: "#ccc",
     linkColor: "blue",
+    placeholderColor: "#888", // Add placeholder color for light theme
   },
   dark: {
     backgroundColor: "#333",
     textColor: "#fff",
     borderColor: "#888",
     linkColor: "lightblue",
+    placeholderColor: "#aaa", // Add placeholder color for dark theme
   },
 };
 
@@ -93,17 +95,18 @@ const FoodScreen = ({ navigation }) => {
   const { theme } = useTheme(); // Get the current theme
   const styles = getStyles(theme); // Get styles based on the current theme
 
-  const [query, setQuery] = useState("");
-  const [foods, setFoods] = useState([]);
-  const [selectedFood, setSelectedFood] = useState(null);
-  const [carbs, setCarbs] = useState("");
-  const [fats, setFats] = useState("");
-  const [protein, setProtein] = useState("");
-  const [calories, setCalories] = useState("");
+  const [query, setQuery] = useState(""); // State for search query input
+  const [foods, setFoods] = useState([]); // State for storing fetched food items
+  const [selectedFood, setSelectedFood] = useState(null); // State for the selected food item
+  const [carbs, setCarbs] = useState(""); // State for storing carbs
+  const [fats, setFats] = useState(""); // State for storing fats
+  const [protein, setProtein] = useState(""); // State for storing protein
+  const [calories, setCalories] = useState(""); // State for storing calories
 
-  const appId = "106a2498"; // Replace with your Edamam App ID
-  const apiKey = "d444d58428c68ef47c2f7f97014c0027"; // Replace with your Edamam API Key
+  const appId = "106a2498"; // Edamam App ID
+  const apiKey = "d444d58428c68ef47c2f7f97014c0027"; // Edamam API Key
 
+  // Fetch food data from the Edamam API based on the query
   const fetchFoodData = async () => {
     try {
       const response = await fetch(
@@ -115,74 +118,78 @@ const FoodScreen = ({ navigation }) => {
       }
 
       const data = await response.json();
-      setFoods([{ ...data, food_name: query }]);
+      setFoods([{ ...data, food_name: query }]); // Set the fetched food data
     } catch (error) {
       console.error("Error fetching food data:", error);
     }
   };
 
+  // Handle food selection and calculate nutrient details
   const selectFood = (food) => {
     setSelectedFood(food);
     calculateNutrients(food);
   };
 
+  // Calculate nutrient values for the selected food
   const calculateNutrients = (food) => {
     const carbNutrient = food.totalNutrients.CHOCDF ? food.totalNutrients.CHOCDF.quantity : 0;
     const fatNutrient = food.totalNutrients.FAT ? food.totalNutrients.FAT.quantity : 0;
     const proteinNutrient = food.totalNutrients.PROCNT ? food.totalNutrients.PROCNT.quantity : 0;
     const caloriesNutrient = food.calories ? food.calories : 0;
 
-    setCarbs(carbNutrient.toFixed(1));
-    setFats(fatNutrient.toFixed(1));
-    setProtein(proteinNutrient.toFixed(1));
-    setCalories(caloriesNutrient.toFixed(1));
+    setCarbs(carbNutrient.toFixed(1)); // Set carbs with one decimal precision
+    setFats(fatNutrient.toFixed(1)); // Set fats with one decimal precision
+    setProtein(proteinNutrient.toFixed(1)); // Set protein with one decimal precision
+    setCalories(caloriesNutrient.toFixed(1)); // Set calories with one decimal precision
   };
 
- const saveFood = async () => {
-   const currentNutrients = {
-     carbs: parseFloat(carbs),
-     fats: parseFloat(fats),
-     protein: parseFloat(protein),
-     calories: parseFloat(calories),
-   };
+  // Save the selected food's nutrient data to AsyncStorage
+  const saveFood = async () => {
+    const currentNutrients = {
+      carbs: parseFloat(carbs),
+      fats: parseFloat(fats),
+      protein: parseFloat(protein),
+      calories: parseFloat(calories),
+    };
 
-   try {
-     const savedNutrients = await AsyncStorage.getItem("totalNutrients");
-     let updatedNutrients = {
-       carbs: 0,
-       fats: 0,
-       protein: 0,
-       calories: 0,
-     };
+    try {
+      const savedNutrients = await AsyncStorage.getItem("totalNutrients");
+      let updatedNutrients = {
+        carbs: 0,
+        fats: 0,
+        protein: 0,
+        calories: 0,
+      };
 
-     if (savedNutrients) {
-       const parsedNutrients = JSON.parse(savedNutrients);
-       updatedNutrients = {
-         carbs: parsedNutrients.carbs + currentNutrients.carbs,
-         fats: parsedNutrients.fats + currentNutrients.fats,
-         protein: parsedNutrients.protein + currentNutrients.protein,
-         calories: parsedNutrients.calories + currentNutrients.calories,
-       };
-     } else {
-       updatedNutrients = currentNutrients;
-     }
+      // Update nutrients if there are already saved nutrients
+      if (savedNutrients) {
+        const parsedNutrients = JSON.parse(savedNutrients);
+        updatedNutrients = {
+          carbs: parsedNutrients.carbs + currentNutrients.carbs,
+          fats: parsedNutrients.fats + currentNutrients.fats,
+          protein: parsedNutrients.protein + currentNutrients.protein,
+          calories: parsedNutrients.calories + currentNutrients.calories,
+        };
+      } else {
+        updatedNutrients = currentNutrients;
+      }
 
-     await AsyncStorage.setItem("totalNutrients", JSON.stringify(updatedNutrients));
+      await AsyncStorage.setItem("totalNutrients", JSON.stringify(updatedNutrients));
 
-     // Show success alert
-     Alert.alert("Success", "Food has been saved successfully!");
+      // Show success alert
+      Alert.alert("Success", "Food has been saved successfully!");
 
-   } catch (error) {
-     console.error("Error saving food data:", error);
-   }
- };
+    } catch (error) {
+      console.error("Error saving food data:", error);
+    }
+  };
 
-
+  // Handle food search action
   const handleSearch = () => {
     if (query.length > 0) {
       fetchFoodData();
     } else {
-      setFoods([]);
+      setFoods([]); // Clear food list if the query is empty
     }
   };
 
@@ -193,6 +200,7 @@ const FoodScreen = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Eg:100g of chicken thigh"
+          placeholderTextColor={themes[theme].placeholderColor} // Adjust the placeholder text color based on theme
           value={query}
           onChangeText={setQuery}
         />
