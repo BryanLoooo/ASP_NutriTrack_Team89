@@ -1,13 +1,30 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getFirestore, collection, query, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { FontAwesome } from '@expo/vector-icons';
 import auth from '@react-native-firebase/auth';
+import { useTheme } from "./ThemeContext";
+import Footer from './Footer.js'; 
 
-const Social = () => {
+const themes = {
+  light: {
+    backgroundColor: "#fff",
+    textColor: "#333",
+    borderColor: "#ccc",
+    linkColor: "blue",
+  },
+  dark: {
+    backgroundColor: "#333",
+    textColor: "#fff",
+    borderColor: "#888",
+    linkColor: "lightblue",
+  },
+};
+
+const Social = ({ navigation }) => {
+  const { theme, toggleTheme } = useTheme();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingPost, setAddingPost] = useState(false);
@@ -107,120 +124,115 @@ const Social = () => {
 
   const isPostLiked = (likedBy) => likedBy.includes(currentUserId);
 
-  return (
-    <View style={styles.container}>
-      {/* Conditionally render welcome text if not adding a post */}
-      {!addingPost && (
-        <View style={[styles.welcomeContainer, posts.length > 0 ? styles.headerWelcome : styles.middleWelcome]}>
-          <Text style={styles.welcomeText}>
-            Welcome to NutriTrack's social page, a space where you can share and explore the health journeys of fellow community members.
-          </Text>
-        </View>
-      )}
+  const currentTheme = themes[theme];
 
-      {addingPost ? (
-        <View style={styles.addPostContainer}>
-          {image && <Image source={{ uri: image }} style={styles.image} />}
-          <TextInput
-            style={styles.input}
-            placeholder="Add a caption..."
-            value={caption}
-            onChangeText={setCaption}
-          />
-          <View style={styles.buttonContainer}>
-            <Button title="Cancel" onPress={() => {
-              setAddingPost(false);
-              setImage(null);
-              setCaption('');
-            }} color="red" />
-            <Button title="Post" onPress={handlePost} />
+  return(
+    <View style={[styles.container, { backgroundColor: currentTheme.backgroundColor }]}>
+      {/*theme button*/}
+      <View style={styles.themeButtonContainer}>
+        <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
+          <Image
+            style={styles.themeButtonImage}
+            source={theme === "light"
+              ? require("../../project/my-app/assets/Sun.png")
+              : require("../../project/my-app/assets/Moon.png")} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.contentContainer}>
+        {/* Render welcome text if not adding a post */}
+        {!addingPost && (
+          <View style={[styles.welcomeContainer, posts.length > 0 ? styles.headerWelcome : styles.middleWelcome]}>
+            <Text style={styles.welcomeText}>
+              Welcome to NutriTrack's social page, a space where you can share and explore the health journeys of fellow community members!
+            </Text>
           </View>
-        </View>
-      ) : (
-        <>
-          {posts.length > 0 && (
-            <FlatList
-              data={posts}
-              renderItem={({ item }) => (
-                <View key={item.id} style={{ marginBottom: 30 }}>
-                  {item.image && <Image source={{ uri: item.image }} style={{ width: '100%', height: 200 }} />}
-                  <Text style={{ marginTop: 15 }}>{item.caption}</Text>
-                  <View style={styles.likeContainer}>
-                    <TouchableOpacity onPress={() => handleLike(item.id, item.likes, item.likedBy)}>
-                      <FontAwesome
-                        name={isPostLiked(item.likedBy) ? 'heart' : 'heart-o'}
-                        size={20}
-                        color={isPostLiked(item.likedBy) ? 'red' : 'black'}
-                      />
-                    </TouchableOpacity>
-                    <Text style={styles.likeCount}>
-                      {item.likes} {item.likes === 1 ? 'Like' : 'Likes'}
-                    </Text>
-                  </View>
-                </View>
-              )}
-              keyExtractor={(item) => item.id}
-            />
-          )}
+        )}
 
-          {!addingPost && (
-            <TouchableOpacity onPress={pickImage} style={styles.addPostButton}>
-              <Text style={styles.addPostButtonText}>Add Post</Text>
-            </TouchableOpacity>
+        {/* Conditionally render posts */}
+        <View style={styles.mainContentContainer}>
+          {addingPost ? (
+            <View style={styles.addPostContainer}>
+              {image && <Image source={{ uri: image }} style={styles.image} />}
+              <TextInput
+                style={[styles.input, { borderColor: currentTheme.borderColor, color: currentTheme.textColor }]}
+                placeholder="Add a caption..."
+                value={caption}
+                onChangeText={setCaption} />
+              <View style={styles.buttonContainer}>
+                <Button title="Cancel" onPress={() => {
+                  setAddingPost(false);
+                  setImage(null);
+                  setCaption('');
+                }} color="red" />
+                <Button title="Post" onPress={handlePost} />
+              </View>
+            </View>
+          ) : (
+            <>
+              <FlatList
+                data={posts}
+                renderItem={({ item }) => (
+                  <View key={item.id} style={styles.postContainer}>
+                    {item.image && <Image source={{ uri: item.image }} style={styles.postImage} />}
+                    <Text style={[styles.postCaption, { color: currentTheme.textColor }]}>{item.caption}</Text>
+                    <View style={styles.likeContainer}>
+                      <TouchableOpacity onPress={() => handleLike(item.id, item.likes, item.likedBy)}>
+                        <FontAwesome
+                          name={isPostLiked(item.likedBy) ? 'heart' : 'heart-o'}
+                          size={20}
+                          color={isPostLiked(item.likedBy) ? 'red' : currentTheme.textColor} />
+                      </TouchableOpacity>
+                      <Text style={[styles.likeCount, { color: currentTheme.textColor }]}>
+                        {item.likes} {item.likes === 1 ? 'Like' : 'Likes'}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={{ paddingBottom: 100 }}  // Ensure space for the button
+              />
+              <TouchableOpacity onPress={pickImage} style={styles.fixedAddPostButton}>
+                <Text style={styles.addPostButtonText}>Add Post</Text>
+              </TouchableOpacity>
+            </>
           )}
-        </>
-      )}
+        </View>
+      </View>
+
+      <Footer theme={theme} navigation={navigation} />
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
+  themeButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",  
+    alignItems: "center",
+    paddingBottom: 10,
+  },
+  themeButton: {
+    padding: 10,
+    borderRadius: 10,
+  },
+  themeButtonImage: {
+    width: 24,
+    height: 24,
+    resizeMode: "contain",
+  },
   container: {
     flex: 1,
     padding: 20,
   },
-  addPostContainer: {
+  contentContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: 200,
-    height: 200,
-    marginVertical: 10,
-  },
-  input: {
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-  },
-  addPostButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#48AAAD',
-    padding: 10,
-    borderRadius: 50,
-  },
-  addPostButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 20,
   },
   welcomeContainer: {
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    marginBottom: 20,
   },
   headerWelcome: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   middleWelcome: {
     flex: 1,
@@ -228,9 +240,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   welcomeText: {
-    fontSize: 16,
+    fontSize: 17,
     textAlign: 'center',
-    marginBottom: 20,
+  },
+  mainContentContainer: {
+    flex: 1,
+  },
+  addPostContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 5,
+    width: '100%',
+    padding: 10,
+    marginBottom: 10,
+  },
+  buttonContainer: {
+    padding: 20,
+    paddingBottom: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  postContainer: {
+    marginBottom: 30,
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+  },
+  postCaption: {
+    marginTop: 15,
+    fontSize: 16,
   },
   likeContainer: {
     flexDirection: 'row',
@@ -238,9 +286,32 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   likeCount: {
-    color: '#333',
     marginLeft: 5,
+    fontSize: 16,
+  },
+  fixedAddPostButton: {
+    position: 'absolute',
+    width: '45%',
+    right: 20,
+    bottom: 70,  // Adjusted to ensure the button is higher
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 10,
+    zIndex: 10,  // Ensure the button is on top
+  },    
+  addPostButtonText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  addPostBelowWelcomeButton: {
+    alignSelf: 'center',
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 30,
+    marginVertical: 10,
   },
 });
-
+    
 export default Social;
+
