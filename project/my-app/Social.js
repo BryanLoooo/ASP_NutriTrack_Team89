@@ -1,12 +1,16 @@
 
+
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getFirestore, collection, query, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { FontAwesome } from '@expo/vector-icons';
 import auth from '@react-native-firebase/auth';
 import { useTheme } from "./ThemeContext";
 import Footer from './Footer.js'; 
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 const themes = {
   light: {
@@ -37,26 +41,30 @@ const Social = ({ navigation }) => {
     const unsubscribe = auth().onAuthStateChanged(user => {
       if (user) {
         setCurrentUserId(user.uid);
+      } else {
+        console.log('User not authenticated');
       }
     });
 
+    // fetch posts to display on the page from the collection
     const fetchPosts = async () => {
       try {
         const q = query(collection(db, 'socialPagePosts'));
         const querySnapshot = await getDocs(q);
         const fetchedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setPosts(fetchedPosts);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching posts:', error.message);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchPosts();
     return () => unsubscribe();
-  }, []);
+  }, [currentUserId]);
 
+  // function for the user to choose their preferred image to post
   const pickImage = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -65,47 +73,84 @@ const Social = ({ navigation }) => {
         aspect: [4, 3],
         quality: 1,
       });
-
+  
       if (!result.canceled) {
-        setImage(result.assets[0].uri);
+        const source = result.assets[0].uri;
+        // store the image URI locally
+        setImage(source);  
         setAddingPost(true);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
+      console.error('Error picking image:', error.message);
     }
   };
-
+  
+  // function to upload the image to storage
+  const uploadImage = async (imageUri) => {
+    try {
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+  
+      const storage = getStorage();
+      const storageRef = ref(storage, `imagesPosted/${Date.now()}-${currentUserId}.jpg`);
+      // print where its being uploaded to 
+      console.log('Uploading to:', storageRef.fullPath);
+  
+      const snapshot = await uploadBytes(storageRef, blob);
+      console.log('Upload successful:', snapshot);
+  
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('Download URL:', downloadURL);
+      return downloadURL;
+    } 
+    // if any error in uploading
+    catch (error) {
+      console.error("Error uploading image: ", error.message);
+      alert(`Error uploading image: ${error.message}`);
+      throw error;
+    }
+  };
+  
+  // posting the chosen image with the caption
   const handlePost = async () => {
     if (image && caption) {
       try {
+        // Upload the edited image
+        const imageUri = await uploadImage(image); 
+        // reference to the firestore collection 
         const docRef = await addDoc(collection(db, 'socialPagePosts'), {
-          image,
+          image: imageUri,
           caption,
           likes: 0,
           likedBy: [],
+          createdAt: new Date(),
+          userId: currentUserId,
         });
-
-        const newPost = { id: docRef.id, image, caption, likes: 0, likedBy: [] };
+        // data of the post
+        const newPost = { id: docRef.id, image: imageUri, caption, likes: 0, likedBy: [] };
         setPosts([...posts, newPost]);
-
-        // Reset after posting
+  
         setCaption('');
         setImage(null);
         setAddingPost(false);
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error saving post:', error.message);
       }
-    } else {
+    } 
+    else {
       console.log('Please select an image and enter a caption');
     }
   };
-
+  
+  //handle the likes of the post
   const handleLike = async (id, currentLikes, likedBy) => {
     if (!currentUserId) return;
 
     let newLikes = currentLikes;
     let newLikedBy = [...likedBy];
 
+    // one account can only like on
     if (newLikedBy.includes(currentUserId)) {
       newLikes -= 1;
       newLikedBy = newLikedBy.filter(userId => userId !== currentUserId);
@@ -113,7 +158,7 @@ const Social = ({ navigation }) => {
       newLikes += 1;
       newLikedBy.push(currentUserId);
     }
-
+    // updating the collection wiht the likes
     await updateDoc(doc(db, 'socialPagePosts', id), {
       likes: newLikes,
       likedBy: newLikedBy,
@@ -122,25 +167,23 @@ const Social = ({ navigation }) => {
     setPosts(posts.map(post => post.id === id ? { ...post, likes: newLikes, likedBy: newLikedBy } : post));
   };
 
-  const isPostLiked = (likedBy) => likedBy.includes(currentUserId);
+  const isPostLiked = (likedBy = []) => likedBy.includes(currentUserId);
 
   const currentTheme = themes[theme];
 
-  return(
+  return (
     <View style={[styles.container, { backgroundColor: currentTheme.backgroundColor }]}>
-      {/*theme button*/}
+      {/* Theme Toggle Button */}
       <View style={styles.themeButtonContainer}>
         <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
           <Image
             style={styles.themeButtonImage}
-            source={theme === "light"
-              ? require("../../project/my-app/assets/Sun.png")
-              : require("../../project/my-app/assets/Moon.png")} />
+            source={theme === "light" ? require("../../project/my-app/assets/Sun.png") : require("../../project/my-app/assets/Moon.png")} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.contentContainer}>
-        {/* Render welcome text if not adding a post */}
+         {/* display welcome message if user is not in the process of adding a post */}
         {!addingPost && (
           <View style={[styles.welcomeContainer, posts.length > 0 ? styles.headerWelcome : styles.middleWelcome]}>
             <Text style={styles.welcomeText}>
@@ -149,16 +192,20 @@ const Social = ({ navigation }) => {
           </View>
         )}
 
-        {/* Conditionally render posts */}
         <View style={styles.mainContentContainer}>
-          {addingPost ? (
+          {loading ? (
+            <ActivityIndicator size="large" color={currentTheme.textColor} />
+          ) : addingPost ? (
             <View style={styles.addPostContainer}>
-              {image && <Image source={{ uri: image }} style={styles.image} />}
+              {/* Display Selected Image */}
+              {image && <Image source={{ uri: image }}  style={{ width: '100%', height: undefined, aspectRatio: 4 / 3 }}  />}
+               {/* add caption for the image */}
               <TextInput
                 style={[styles.input, { borderColor: currentTheme.borderColor, color: currentTheme.textColor }]}
                 placeholder="Add a caption..."
                 value={caption}
                 onChangeText={setCaption} />
+              {/* post or cancel posting */}
               <View style={styles.buttonContainer}>
                 <Button title="Cancel" onPress={() => {
                   setAddingPost(false);
@@ -174,8 +221,10 @@ const Social = ({ navigation }) => {
                 data={posts}
                 renderItem={({ item }) => (
                   <View key={item.id} style={styles.postContainer}>
+                     {/* post image */}
                     {item.image && <Image source={{ uri: item.image }} style={styles.postImage} />}
                     <Text style={[styles.postCaption, { color: currentTheme.textColor }]}>{item.caption}</Text>
+                     {/* like Section */}
                     <View style={styles.likeContainer}>
                       <TouchableOpacity onPress={() => handleLike(item.id, item.likes, item.likedBy)}>
                         <FontAwesome
@@ -190,8 +239,9 @@ const Social = ({ navigation }) => {
                   </View>
                 )}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingBottom: 100 }}  // Ensure space for the button
+                contentContainerStyle={{ paddingBottom: 100 }}  
               />
+              {/* add post button near the footer */}
               <TouchableOpacity onPress={pickImage} style={styles.fixedAddPostButton}>
                 <Text style={styles.addPostButtonText}>Add Post</Text>
               </TouchableOpacity>
@@ -202,8 +252,10 @@ const Social = ({ navigation }) => {
 
       <Footer theme={theme} navigation={navigation} />
     </View>
-  )
-}
+  );
+};
+
+
 
 const styles = StyleSheet.create({
   themeButtonContainer: {
@@ -293,11 +345,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '45%',
     right: 20,
-    bottom: 70,  // Adjusted to ensure the button is higher
+    bottom: 70,
     backgroundColor: 'blue',
     padding: 10,
     borderRadius: 10,
-    zIndex: 10,  // Ensure the button is on top
+    zIndex: 10,  
   },    
   addPostButtonText: {
     color: 'white',
@@ -314,4 +366,3 @@ const styles = StyleSheet.create({
 });
     
 export default Social;
-
