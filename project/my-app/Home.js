@@ -1,5 +1,5 @@
 //Home.js
-//import libraries
+//import libraries and dependencies
 import React, { useState,  useEffect, useCallback } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,10 +7,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "./ThemeContext";
 import Footer from "./Footer";
 
-//stylesheet
+//stylesheet for user interface elements
 const styles = StyleSheet.create({
 
-  // Common styles
+  // Common styles that are used both in light and dark mode
   container: {
     flex: 1,
     backgroundColor: "#f2f2f2",
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     marginBottom: 100,
   },
 
-  // Light mode
+  // Light mode user interface elements
   light: {
     container: {
       flex: 1,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     },
   },
 
-  // Dark mode
+  // Dark mode user interface elements
   dark: {
     container: {
       flex: 1,
@@ -294,17 +294,29 @@ const styles = StyleSheet.create({
   },
 });
 
+// Homescreen componenet
 const HomeScreen2 = ({ navigation }) => {
+
+  //get the current theme and theme toggler from context
   const { theme, toggleTheme } = useTheme();
+
+  //state variables for tracking selected articles
   const [selectedArticle] = useState(null);
+
+  //state variables for tracking nutrient data
   const [caloriesGoal] = useState(3000);
   const [totalCarbs, setTotalCarbs] = useState(0);
   const [totalFats, setTotalFats] = useState(0);
   const [totalProtein, setTotalProtein] = useState(0);
   const [totalCalories, setTotalCalories] = useState(0);
+
+  //set the max calories for progress bar
   const maxCalories = 4000;
 
+  //function to fetch stored nutrient data from AsyncStorage
   const fetchTotalNutrients = async () => {
+
+    //try to retrieve nutrients information and display it on user interface
     try {
       console.log("Retrieving total nutrients information");
       const savedNutrients = await AsyncStorage.getItem("totalNutrients");
@@ -315,6 +327,7 @@ const HomeScreen2 = ({ navigation }) => {
         setTotalFats(parsedNutrients.fats);
         setTotalProtein(parsedNutrients.protein);
 
+        //check if the totalCalories display falls into any of the conditions
         if(totalCalories > 4000){
           Alert.alert("Max calories for the day have been reached.");
           console.log("Max limit for the day has been reached");
@@ -337,6 +350,7 @@ const HomeScreen2 = ({ navigation }) => {
     }
   };
 
+  //useEffect to reset the nutrients information
   useEffect(() => {
     const resetDataOnStart = async () => {
       try {
@@ -349,11 +363,15 @@ const HomeScreen2 = ({ navigation }) => {
       }
     };
 
+    //calls the function to reset the nutrients information
     resetDataOnStart();
+
+    //calls the function to retrieve all the nutrients information
     fetchTotalNutrients();
   }, []
 );
 
+  //useFocusEffect is used to fetch information data when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       try {
@@ -370,12 +388,16 @@ const HomeScreen2 = ({ navigation }) => {
 
   // Check if calories exceed the maximum allowed
   if (totalCalories > 3000) {
+
     Alert.alert("Reminder, calories for the day have been reached. Don't give up!");
     console.log("Calories set for the day has been reached.");
+
   } else {
+
     console.log("Calories for the day are still within range. User can continue consuming calories.");
   }
 
+  //dataset of the list of articles to display on the screen
   const articles = [
     {
       title: "How to eat healthy",
@@ -399,6 +421,7 @@ const HomeScreen2 = ({ navigation }) => {
     },
   ];
 
+  //dataset of the list of calories for the week
   const calorieData = {
     Monday: 1800,
     Tuesday: 2500,
@@ -409,7 +432,7 @@ const HomeScreen2 = ({ navigation }) => {
     Sunday: 2200,
   };
 
-  // user interface elements
+  // return the JSX elements that make up the User Interface
   return (
     <ScrollView style={styles[theme].container}>
       <View style={styles[theme].header}>
@@ -527,5 +550,5 @@ const HomeScreen2 = ({ navigation }) => {
   );
 };
 
-// export HomeScreen as a external module for referencing
+// export HomeScreen2 as a external module for referencing
 export default HomeScreen2;
