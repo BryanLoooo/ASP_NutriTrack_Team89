@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "408078757305",
+    "project_id": "socialpage-e371d",
+    "storage_bucket": "socialpage-e371d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:408078757305:android:9300820b92e38e4af65a68",
+        "android_client_info": {
+          "package_name": "com.anonymous.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdpuAZvLR6sspQY6EJTvDoY_q_xP6PDvY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

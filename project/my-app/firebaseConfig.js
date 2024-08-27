@@ -1,6 +1,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 
 // firebase configuration using the apikey
@@ -18,6 +19,7 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firestore
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 export const addFeedback = async ({ feedback, rating }) => {
   try {
@@ -30,5 +32,6 @@ export const addFeedback = async ({ feedback, rating }) => {
     throw new Error('Failed to submit feedback');
   }
 };
-export { db };
+
+export { db,storage };
 
