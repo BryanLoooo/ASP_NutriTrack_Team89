@@ -51,6 +51,7 @@ Make sure you have the following installed:
 - Node.js
 - npm (Node Package Manager)
 - Expo CLI
+- JDK 17 (set system variable and system path)
 
 ## Installation
 
