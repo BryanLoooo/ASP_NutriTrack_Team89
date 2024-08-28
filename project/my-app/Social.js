@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,9 +7,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import auth from '@react-native-firebase/auth';
 import { useTheme } from "./ThemeContext";
 import Footer from './Footer.js'; 
+// using firebase storage to store the images
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-
+// set theme styling
 const themes = {
   light: {
     backgroundColor: "#fff",
@@ -39,80 +38,107 @@ const Social = ({ navigation }) => {
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(user => {
+      // ensure user is authenticated
       if (user) {
         setCurrentUserId(user.uid);
-      } else {
+      } 
+      else {
         console.log('User not authenticated');
       }
     });
 
     // fetch posts to display on the page from the collection
     const fetchPosts = async () => {
+      // error handling
       try {
+        // query get all the images from the collection called - 'socialPagePosts'
         const q = query(collection(db, 'socialPagePosts'));
+        // execute the query and get the snapshot of it
         const querySnapshot = await getDocs(q);
+        // map through the images and create an array of posts with their data and document IDs
         const fetchedPosts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // update the state 'posts' with the fetched posts
         setPosts(fetchedPosts);
-      } catch (error) {
+      } 
+      // if there is any error in while fetching the posts, display the message
+      catch (error) {
         console.error('Error fetching posts:', error.message);
-      } finally {
+      } 
+      finally {
         setLoading(false);
       }
     };
-
+    // call the fetchPosts function to load posts
     fetchPosts();
+    //return a cleanup function to unsubscribe when the component unmounts
     return () => unsubscribe();
-  }, [currentUserId]);
+  }, [currentUserId]); // when the user changes, it will re-run the effect
 
   // function for the user to choose their preferred image to post
   const pickImage = async () => {
+    // error handling
     try {
+      // using imagePicker to allow users to choose the images from their device
       let result = await ImagePicker.launchImageLibraryAsync({
+        // only images are allowed
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // allow the chosen image to be cropped and edited
         allowsEditing: true,
+        // image aspect ratio
         aspect: [4, 3],
         quality: 1,
       });
-  
+      // if user cancels the process of posting the image
       if (!result.canceled) {
         const source = result.assets[0].uri;
         // store the image URI locally
         setImage(source);  
         setAddingPost(true);
       }
-    } catch (error) {
+      if (result){
+        console.log('Image to be posted has been chosen')
+      }
+    } 
+    // if any error in choosing the images, display the error message to test function
+    catch (error) {
       console.error('Error picking image:', error.message);
     }
   };
   
   // function to upload the image to storage
   const uploadImage = async (imageUri) => {
+    // error handling
     try {
+      // fetch the image based on the URI
       const response = await fetch(imageUri);
+      // convert to blob to upload
       const blob = await response.blob();
   
+      // get the firebase storage reference
       const storage = getStorage();
+      // create a unique file path in storage
       const storageRef = ref(storage, `imagesPosted/${Date.now()}-${currentUserId}.jpg`);
       // print where its being uploaded to 
       console.log('Uploading to:', storageRef.fullPath);
-  
+      // upload the blob to the firebase
       const snapshot = await uploadBytes(storageRef, blob);
       console.log('Upload successful:', snapshot);
   
+      // get the image's download Url
       const downloadURL = await getDownloadURL(snapshot.ref);
       console.log('Download URL:', downloadURL);
       return downloadURL;
     } 
-    // if any error in uploading
+    // if any error in uploading, print the error message to test function
     catch (error) {
       console.error("Error uploading image: ", error.message);
-      alert(`Error uploading image: ${error.message}`);
       throw error;
     }
   };
   
   // posting the chosen image with the caption
   const handlePost = async () => {
+    // if the image and caption is both there, try uploading the image
     if (image && caption) {
       try {
         // Upload the edited image
@@ -126,14 +152,19 @@ const Social = ({ navigation }) => {
           createdAt: new Date(),
           userId: currentUserId,
         });
-        // data of the post
+        console.log('image successfully posted: ', image)
+        console.log('caption for the chosen image: ', caption)
+        // create a new post object with the uploaded data
         const newPost = { id: docRef.id, image: imageUri, caption, likes: 0, likedBy: [] };
+        // include the new post in the posts state
         setPosts([...posts, newPost]);
-  
+
+        // reset the caption, clear the chosen image and adding post becomes false since its posted already
         setCaption('');
         setImage(null);
         setAddingPost(false);
       }
+      // display any post saving error to test function
       catch (error) {
         console.error('Error saving post:', error.message);
       }
@@ -145,28 +176,35 @@ const Social = ({ navigation }) => {
   
   //handle the likes of the post
   const handleLike = async (id, currentLikes, likedBy) => {
+    // if user is not logged in, cant post
     if (!currentUserId) return;
 
     let newLikes = currentLikes;
+    // clone likedBy array
     let newLikedBy = [...likedBy];
 
-    // one account can only like on
+    // check if the post is already liked by the user
     if (newLikedBy.includes(currentUserId)) {
+      // decrease if the heart is pressed again after liking
       newLikes -= 1;
+      // remove user from likedBy array, since the post is disliked now
       newLikedBy = newLikedBy.filter(userId => userId !== currentUserId);
-    } else {
+    } 
+    // increase the likes and add the user to the array
+    else {
       newLikes += 1;
       newLikedBy.push(currentUserId);
     }
-    // updating the collection wiht the likes
+    // updating the collection with the like data
     await updateDoc(doc(db, 'socialPagePosts', id), {
       likes: newLikes,
       likedBy: newLikedBy,
     });
-
+    // Update the state to reflect the new like count
     setPosts(posts.map(post => post.id === id ? { ...post, likes: newLikes, likedBy: newLikedBy } : post));
   };
 
+  // function to check if a post is liked by the current user
   const isPostLiked = (likedBy = []) => likedBy.includes(currentUserId);
 
   const currentTheme = themes[theme];
@@ -195,7 +233,7 @@ const Social = ({ navigation }) => {
         <View style={styles.mainContentContainer}>
           {loading ? (
             <ActivityIndicator size="large" color={currentTheme.textColor} />
-          ) : addingPost ? (
+          ) : addingPost ? (  // Show post editor if the user is adding a post
             <View style={styles.addPostContainer}>
               {/* Display Selected Image */}
               {image && <Image source={{ uri: image }}  style={{ width: '100%', height: undefined, aspectRatio: 4 / 3 }}  />}
@@ -207,37 +245,44 @@ const Social = ({ navigation }) => {
                 onChangeText={setCaption} />
               {/* post or cancel posting */}
               <View style={styles.buttonContainer}>
+                {/** cancel button and if cancelled, the caption, and selected image will be resetted */}
                 <Button title="Cancel" onPress={() => {
                   setAddingPost(false);
                   setImage(null);
                   setCaption('');
                 }} color="red" />
+                 {/** post button */}
                 <Button title="Post" onPress={handlePost} />
               </View>
             </View>
           ) : (
             <>
               <FlatList
+               // List of posts
                 data={posts}
                 renderItem={({ item }) => (
                   <View key={item.id} style={styles.postContainer}>
                      {/* post image */}
                     {item.image && <Image source={{ uri: item.image }} style={styles.postImage} />}
+                    {/* caption of the post */}
                     <Text style={[styles.postCaption, { color: currentTheme.textColor }]}>{item.caption}</Text>
                      {/* like Section */}
                     <View style={styles.likeContainer}>
                       <TouchableOpacity onPress={() => handleLike(item.id, item.likes, item.likedBy)}>
                         <FontAwesome
+                          // if liked, the outlined heart white heart will turn red
                           name={isPostLiked(item.likedBy) ? 'heart' : 'heart-o'}
                           size={20}
                           color={isPostLiked(item.likedBy) ? 'red' : currentTheme.textColor} />
                       </TouchableOpacity>
+                      {/** display the like count */}
                       <Text style={[styles.likeCount, { color: currentTheme.textColor }]}>
                         {item.likes} {item.likes === 1 ? 'Like' : 'Likes'}
                       </Text>
                     </View>
                   </View>
                 )}
+                // unique identifier for each post
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{ paddingBottom: 100 }}  
               />
@@ -258,6 +303,8 @@ const Social = ({ navigation }) => {
 
 
 const styles = StyleSheet.create({
+
+  // theme styling
   themeButtonContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",  
@@ -280,12 +327,14 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
+  // welcome text
   welcomeContainer: {
     marginBottom: 20,
   },
   headerWelcome: {
     alignItems: 'center',
   },
+  // put the welcome text in the middle when there is no posts but shift to the top when there are images
   middleWelcome: {
     flex: 1,
     justifyContent: 'center',
@@ -302,11 +351,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 20,
   },
+  // image styles 
   image: {
     width: 200,
     height: 200,
     marginBottom: 10,
   },
+  // caption input
   input: {
     borderWidth: 1,
     borderRadius: 5,
@@ -324,6 +375,7 @@ const styles = StyleSheet.create({
   postContainer: {
     marginBottom: 30,
   },
+  // image after posting
   postImage: {
     width: '100%',
     height: 200,
@@ -332,6 +384,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     fontSize: 16,
   },
+  // like section
   likeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -341,6 +394,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 16,
   },
+  // post button towards the end of the page
   fixedAddPostButton: {
     position: 'absolute',
     width: '45%',
