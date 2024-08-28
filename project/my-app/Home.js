@@ -1,7 +1,16 @@
 //Home.js
 //import libraries and dependencies
-import React, { useState,  useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, Alert } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+  Alert,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "./ThemeContext";
@@ -9,7 +18,6 @@ import Footer from "./Footer";
 
 //stylesheet for different user interface elements, it accomodates for both light and dark themes
 const styles = StyleSheet.create({
-
   // Common styles for all themes
   container: {
     flex: 1,
@@ -20,6 +28,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 0,
+    marginBottom: -20,
   },
   title: {
     fontSize: 32,
@@ -29,7 +38,7 @@ const styles = StyleSheet.create({
   titleImage: {
     width: 100,
     height: 100,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   articleList: {
     flexDirection: "row",
@@ -73,8 +82,8 @@ const styles = StyleSheet.create({
     backgroundColor: "grey",
   },
   dailyProgressFill: {
-    height: '100%',
-    backgroundColor: 'green',
+    height: "100%",
+    backgroundColor: "green",
     borderRadius: 10,
   },
   historyProgressFill: {
@@ -101,6 +110,7 @@ const styles = StyleSheet.create({
       borderBottomRightRadius: 20,
       borderWidth: 1,
       borderColor: "black",
+      marginTop: -20,
     },
     title: {
       fontSize: 24,
@@ -164,29 +174,29 @@ const styles = StyleSheet.create({
     },
     limitContainer: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent: "flex-end",
     },
     limitText: {
-      textAlign: 'right',
+      textAlign: "right",
     },
     postContainer: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       padding: 5,
       marginTop: 15,
     },
     postButton: {
-      width: '100%',
+      width: "100%",
       padding: 8,
-      backgroundColor: 'green',
-      alignItems: 'center',
+      backgroundColor: "green",
+      alignItems: "center",
       borderRadius: 10,
     },
     postButtonText: {
-      color: 'white',
+      color: "white",
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: "bold",
     },
   },
 
@@ -259,6 +269,7 @@ const styles = StyleSheet.create({
       borderBottomRightRadius: 20,
       borderWidth: 1,
       borderColor: "#666",
+      marginTop: -20,
     },
     activityButtonText: {
       color: "white",
@@ -266,39 +277,37 @@ const styles = StyleSheet.create({
     },
     limitContainer: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent: "flex-end",
     },
     limitText: {
-      textAlign: 'right',
-      color: 'white',
+      textAlign: "right",
+      color: "white",
     },
     postContainer: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       padding: 5,
       marginTop: 15,
     },
     postButton: {
-      width: '100%',
+      width: "100%",
       padding: 8,
-      backgroundColor: 'black',
-      alignItems: 'center',
+      backgroundColor: "black",
+      alignItems: "center",
       borderRadius: 10,
     },
     postButtonText: {
-      color: 'white',
+      color: "white",
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: "bold",
     },
   },
 });
 
 //Main homescreen2 component
 const HomeScreen2 = ({ navigation }) => {
-
-  try{
-
+  try {
     console.log("Home screen page has been executed successfully");
 
     //get the current page theme and theme toggler from context
@@ -319,7 +328,6 @@ const HomeScreen2 = ({ navigation }) => {
 
     //function to fetch stored nutrients information from AsyncStorage
     const fetchTotalNutrients = async () => {
-
       try {
         console.log("Retrieving total nutrients information");
         const savedNutrients = await AsyncStorage.getItem("totalNutrients");
@@ -332,26 +340,33 @@ const HomeScreen2 = ({ navigation }) => {
           setTotalProtein(parsedNutrients.protein);
 
           //checks if the current totalCalories is within the range
-          if(totalCalories > 4000){
+          if (totalCalories > 4000) {
             Alert.alert("Max calories for the day have been reached.");
             console.log("Max limit for the day has been reached");
-
-          }else if(totalCalories < 4000){
+          } else if (totalCalories < 4000) {
             setTotalCalories(parsedNutrients.calories);
-            console.log("Limit for the day has not been reached. Calories added.");
-
-          }else{
+            console.log(
+              "Limit for the day has not been reached. Calories added."
+            );
+          } else {
             console.log("No food information has been logged");
           }
-          
-          console.log("Successfully retrieved and update total nutrients information");
+
+          console.log(
+            "Successfully retrieved and update total nutrients information"
+          );
 
           //returns a failed message if there is no nutrients information
         } else {
-          console.log("Current nutrients information is all set to 0. Please add food items to see updated information");
+          console.log(
+            "Current nutrients information is all set to 0. Please add food items to see updated information"
+          );
         }
       } catch (error) {
-        console.error("Failed. Error retrieving total nutrients information. Error description: ", error);
+        console.error(
+          "Failed. Error retrieving total nutrients information. Error description: ",
+          error
+        );
       }
     };
 
@@ -359,7 +374,6 @@ const HomeScreen2 = ({ navigation }) => {
     useEffect(() => {
       const resetDataOnStart = async () => {
         try {
-
           console.log("Reset nutrients information back to 0");
           await AsyncStorage.removeItem("totalNutrients");
 
@@ -367,7 +381,10 @@ const HomeScreen2 = ({ navigation }) => {
 
           //returns a failed message if the nutrients information is not able to set to 0
         } catch (error) {
-          console.error("Failed. Error resetting nutrients information. Error description: ", error);
+          console.error(
+            "Failed. Error resetting nutrients information. Error description: ",
+            error
+          );
         }
       };
 
@@ -376,14 +393,12 @@ const HomeScreen2 = ({ navigation }) => {
 
       //function call to fetch nutrients information and display it
       fetchTotalNutrients();
-    }, []
-  );
+    }, []);
 
     //useFocusEffect function is used to fetch information when the screen comes into focus
     useFocusEffect(
       useCallback(() => {
         try {
-
           console.log("Fetching total nutrients information using focus");
           fetchTotalNutrients();
 
@@ -391,21 +406,27 @@ const HomeScreen2 = ({ navigation }) => {
 
           //returns and error of the function did not work as expected
         } catch (error) {
-          console.error("Failed. Error during focus effect. Error description:", error);
+          console.error(
+            "Failed. Error during focus effect. Error description:",
+            error
+          );
         }
       }, [])
     );
 
     // Check if calories exceed the maximum allowed
     if (totalCalories > 3000) {
-
       //returns an alert on the user interface when the user has consumed more than the daily set goal
-      Alert.alert("Reminder, calories for the day have been reached. Don't give up!");
+      Alert.alert(
+        "Reminder, calories for the day have been reached. Don't give up!"
+      );
       console.log("Calories set for the day has been reached.");
 
       //if the total daily set calories are within range, no alert is generated and the user can continue insertion
     } else {
-      console.log("Calories for the day are still within range. User can continue consuming calories.");
+      console.log(
+        "Calories for the day are still within range. User can continue consuming calories."
+      );
     }
 
     //dataset for the list of articles for the user to explore
@@ -445,122 +466,154 @@ const HomeScreen2 = ({ navigation }) => {
 
     // return the JSX elements that make up the user interface
     return (
-      <ScrollView style={styles[theme].container}>
-        <View style={styles[theme].header}>
-          <View style={styles.headerInner}>
-            <Image source={require("../my-app/assets/logoHome.png")} style={styles.titleImage} />
-            <TouchableOpacity
-              style={styles[theme].themeButton}
-              onPress={() => {
-                try {
-                  console.log("Theme button has been triggered");
-                  toggleTheme();
-                } catch (error) {
-                  console.error("Failed. Error toggling theme. Error description:", error);
-                }
-              }}
-            >
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView style={styles[theme].container}>
+          <View style={styles[theme].header}>
+            <View style={styles.headerInner}>
               <Image
-                source={
-                  theme === "light"
-                    ? require("../../project/my-app/assets/Sun.png")
-                    : require("../../project/my-app/assets/Moon.png")
-                }
-                style={styles[theme].themeButtonImage}
+                source={require("../my-app/assets/logoHome.png")}
+                style={styles.titleImage}
               />
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.articleList}
-          >
-            {articles.map((article) => (
               <TouchableOpacity
-                key={article.title}
-                style={[
-                  styles.articleButton,
-                  selectedArticle === article.title && styles.selectedArticleButton,
-                ]}
+                style={styles[theme].themeButton}
                 onPress={() => {
                   try {
-                    console.log(`Navigating to ${article.title} article`);
-                    navigation.navigate("Articles");
-                    console.log("Successfully navigation to selected article")
+                    console.log("Theme button has been triggered");
+                    toggleTheme();
                   } catch (error) {
-                    console.error("Failed. Error navigating to articles. Error description: ", error);
+                    console.error(
+                      "Failed. Error toggling theme. Error description:",
+                      error
+                    );
                   }
                 }}
               >
-                <Image source={article.image} style={styles.articleImage} />
-                <Text style={styles.articleButtonText}>{article.title}</Text>
+                <Image
+                  source={
+                    theme === "light"
+                      ? require("../../project/my-app/assets/Sun.png")
+                      : require("../../project/my-app/assets/Moon.png")
+                  }
+                  style={styles[theme].themeButtonImage}
+                />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-        <View style={styles[theme].postContainer}>
-          <TouchableOpacity 
-            style={styles[theme].postButton} 
-            onPress={() => {
-              try {
-                console.log("Navigating to social page");
-                navigation.navigate("Social");
-                console.log("Successful navigation to social page")
-              } catch (error) {
-                console.error("Failed. Error navigating to social page. Error description: ", error);
-              }
-            }}
-          >
-            <Text style={styles[theme].postButtonText}>+ Add post</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles[theme].dailyTitle}>Today's progress: </Text>
-        <View style={styles[theme].dailyProgressContainer}>
-          <View style={styles.dailyProgressBar}>
-            <View style={[styles.dailyProgressFill, { width: `${(totalCalories / maxCalories) * 100}%`, backgroundColor: totalCalories > 3000 ? "red" : "green", maxWidth: "100%" }]} />
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.articleList}
+            >
+              {articles.map((article) => (
+                <TouchableOpacity
+                  key={article.title}
+                  style={[
+                    styles.articleButton,
+                    selectedArticle === article.title &&
+                      styles.selectedArticleButton,
+                  ]}
+                  onPress={() => {
+                    try {
+                      console.log(`Navigating to ${article.title} article`);
+                      navigation.navigate("Articles");
+                      console.log(
+                        "Successfully navigation to selected article"
+                      );
+                    } catch (error) {
+                      console.error(
+                        "Failed. Error navigating to articles. Error description: ",
+                        error
+                      );
+                    }
+                  }}
+                >
+                  <Image source={article.image} style={styles.articleImage} />
+                  <Text style={styles.articleButtonText}>{article.title}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-          <View style={styles[theme].limitContainer}>
-            <Text style={styles[theme].limitText}>
-                Daily limit: {caloriesGoal} cals
-            </Text>
-            <Text style={styles[theme].limitText}>
-                Max: {maxCalories} cals
-            </Text>
-        </View>
-          <View style={styles[theme].statsContainer}>
-            <Text style={styles[theme].dailyProgressText}>
-              Calories: {totalCalories} cals
-            </Text>
-            <Text style={styles[theme].dailyProgressText}>
-              Goal: {caloriesGoal} cals
-            </Text>
-            <Text style={styles[theme].dailyProgressText}>Protein: {totalProtein}g</Text>
-            <Text style={styles[theme].dailyProgressText}>Fats: {totalFats}g</Text>
-            <Text style={styles[theme].dailyProgressText}>
-              Carbohydrates: {totalCarbs}g
-            </Text>
+          <View style={styles[theme].postContainer}>
+            <TouchableOpacity
+              style={styles[theme].postButton}
+              onPress={() => {
+                try {
+                  console.log("Navigating to social page");
+                  navigation.navigate("Social");
+                  console.log("Successful navigation to social page");
+                } catch (error) {
+                  console.error(
+                    "Failed. Error navigating to social page. Error description: ",
+                    error
+                  );
+                }
+              }}
+            >
+              <Text style={styles[theme].postButtonText}>+ Add post</Text>
+            </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.historyProgressContainer}>
-          {Object.entries(calorieData).map(([day, calories]) => (
-            <View style={styles[theme].historyProgressItem} key={day}>
-              <Text style={styles[theme].historyProgressText}>{day}</Text>
+          <Text style={styles[theme].dailyTitle}>Today's progress: </Text>
+          <View style={styles[theme].dailyProgressContainer}>
+            <View style={styles.dailyProgressBar}>
               <View
                 style={[
-                  styles.historyProgressFill,
-                  { backgroundColor: calories > 3000 ? "red" : "green", width: `${(calories / 5000) * 100}%` },
+                  styles.dailyProgressFill,
+                  {
+                    width: `${(totalCalories / maxCalories) * 100}%`,
+                    backgroundColor: totalCalories > 3000 ? "red" : "green",
+                    maxWidth: "100%",
+                  },
                 ]}
               />
             </View>
-          ))}
-        </View>
-        <Footer theme={theme} navigation={navigation} />
-      </ScrollView>
-    );
-  }catch{
+            <View style={styles[theme].limitContainer}>
+              <Text style={styles[theme].limitText}>
+                Daily limit: {caloriesGoal} cals
+              </Text>
+              <Text style={styles[theme].limitText}>
+                Max: {maxCalories} cals
+              </Text>
+            </View>
+            <View style={styles[theme].statsContainer}>
+              <Text style={styles[theme].dailyProgressText}>
+                Calories: {totalCalories} cals
+              </Text>
+              <Text style={styles[theme].dailyProgressText}>
+                Goal: {caloriesGoal} cals
+              </Text>
+              <Text style={styles[theme].dailyProgressText}>
+                Protein: {totalProtein}g
+              </Text>
+              <Text style={styles[theme].dailyProgressText}>
+                Fats: {totalFats}g
+              </Text>
+              <Text style={styles[theme].dailyProgressText}>
+                Carbohydrates: {totalCarbs}g
+              </Text>
+            </View>
+          </View>
 
+          <View style={styles.historyProgressContainer}>
+            {Object.entries(calorieData).map(([day, calories]) => (
+              <View style={styles[theme].historyProgressItem} key={day}>
+                <Text style={styles[theme].historyProgressText}>{day}</Text>
+                <View
+                  style={[
+                    styles.historyProgressFill,
+                    {
+                      backgroundColor: calories > 3000 ? "red" : "green",
+                      width: `${(calories / 5000) * 100}%`,
+                    },
+                  ]}
+                />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+        <Footer theme={theme} navigation={navigation} />
+      </SafeAreaView>
+    );
+  } catch {
     //returns an error if the page was not able to load.
     console.log("Failed to load home screen page. Please try again");
   }

@@ -126,6 +126,8 @@ const ArticlesScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true); // State to manage loading status
 
   const handleLike = async (articleUuid) => {
+    // To test function works correctly
+    console.log("Handling like for article:", articleUuid);
     const updatedArticles = articles.map((article) => {
       if (article.uuid === articleUuid) {
         return { ...article, likes: article.likes + 1 };
@@ -133,9 +135,12 @@ const ArticlesScreen = ({ navigation }) => {
       return article;
     });
 
+    // error handling
     try {
       await AsyncStorage.setItem("articles", JSON.stringify(updatedArticles));
       setArticles(updatedArticles);
+      // To test function works correctly
+      console.log("Updated articles with new likes:", updatedArticles);
     } catch (error) {
       console.error("Error saving articles to local storage: ", error);
     }
@@ -150,14 +155,21 @@ const ArticlesScreen = ({ navigation }) => {
 
   // Effect hook for fetching data from APIs
   useEffect(() => {
+    // To test function works correctly
+    console.log("Component mounted, starting to fetch articles...");
     const loadArticles = async () => {
       setIsLoading(true);
+      // error handling
       try {
         const savedArticles = await AsyncStorage.getItem("articles");
         if (savedArticles) {
           setArticles(JSON.parse(savedArticles));
+          // To test function works correctly
+          console.log("Loaded articles from local storage.");
         } else {
           // Fetch from API if no data in local storage
+          // To test function works correctly
+          console.log("No articles in local storage, fetching from API.");
           await fetchDataFromAPI();
         }
       } catch (error) {
@@ -173,6 +185,9 @@ const ArticlesScreen = ({ navigation }) => {
   }, []);
 
   const fetchDataFromAPI = async () => {
+    // To test function works correctly
+    console.log("Fetching data from API...");
+    // error handling
     try {
       const responses = await Promise.all([fetch(URL1), fetch(URL2)]);
       const jsonResponses = await Promise.all(
@@ -189,6 +204,8 @@ const ArticlesScreen = ({ navigation }) => {
       setArticles(fetchedArticles);
       // Save fetched articles to local storage
       await AsyncStorage.setItem("articles", JSON.stringify(fetchedArticles));
+      // To test function works correctly
+      console.log("Fetched and stored new articles:", fetchedArticles);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
