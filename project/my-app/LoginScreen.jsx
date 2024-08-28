@@ -59,6 +59,9 @@ const LoginScreen = () => {
       // Sign-in the user with the credential
       await auth().signInWithCredential(googleCredential);
 
+      // Clear the error
+      setError("");
+
       // Navigate to the Home screen
       navigation.navigate("Home Page");
     } catch (error) {
@@ -70,10 +73,22 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     try {
       await signIn(email, password);
+
+      // Clear the error
+      setError("");
+
       // Navigate to the main app screen after successful login
       navigation.navigate("Home Page");
     } catch (error) {
-      setError(error.message);
+      console.error("Login Error:", error);
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/invalid-credential"
+      ) {
+        setError("Invalid email or password");
+      } else {
+        setError(error.message);
+      }
     }
   };
 

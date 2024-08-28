@@ -65,10 +65,28 @@ const SignupScreen = () => {
   const handleSignup = async () => {
     try {
       await signUp(email, password);
+      console.log("Signup Successful");
+      // Clear the error
+      setError("");
       // Navigate to the main app screen after successful signup
       navigation.navigate("LOGIN");
     } catch (error) {
-      setError(error.message);
+      console.error("Signup Error:", error);
+      if (
+        error.code === "auth/email-already-in-use"
+      ) {
+        setError("Email already in use");
+      } else if (
+        error.code === "auth/invalid-email"
+      ) {
+        setError("Invalid email");
+      } else if (
+        error.code === "auth/weak-password"
+      ) {
+        setError("Password should be at least 6 characters");
+      } else {
+        setError(error.message);
+      }
     }
   };
 
