@@ -308,6 +308,8 @@ const styles = StyleSheet.create({
 //Main homescreen2 component
 const HomeScreen2 = ({ navigation }) => {
   try {
+
+    // Test case 1 Successfully renders homescreen2 component
     console.log("Home screen page has been executed successfully");
 
     //get the current page theme and theme toggler from context
@@ -329,6 +331,8 @@ const HomeScreen2 = ({ navigation }) => {
     //function to fetch stored nutrients information from AsyncStorage
     const fetchTotalNutrients = async () => {
       try {
+
+        // Test case 8 fetch total nutrients information, displays an attempt to retrieve nutrients information
         console.log("Retrieving total nutrients information");
         const savedNutrients = await AsyncStorage.getItem("totalNutrients");
 
@@ -342,9 +346,13 @@ const HomeScreen2 = ({ navigation }) => {
           //checks if the current totalCalories is within the range
           if (totalCalories > 4000) {
             Alert.alert("Max calories for the day have been reached.");
+
+            // Test case 6 daily calorie goal reached alert
             console.log("Max limit for the day has been reached");
           } else if (totalCalories < 4000) {
             setTotalCalories(parsedNutrients.calories);
+
+            // Test case 7 daily calorie goal not reached
             console.log(
               "Limit for the day has not been reached. Calories added."
             );
@@ -352,17 +360,22 @@ const HomeScreen2 = ({ navigation }) => {
             console.log("No food information has been logged");
           }
 
+          // Test case 8 fetch total nutrients information
           console.log(
             "Successfully retrieved and update total nutrients information"
           );
 
           //returns a failed message if there is no nutrients information
         } else {
+
+          // Test case 9 fetch total nutrients information set to 0
           console.log(
             "Current nutrients information is all set to 0. Please add food items to see updated information"
           );
         }
       } catch (error) {
+
+        // Test case 8 fetch total nutrients information, returns failure text if the nutrients information has not been retrieved
         console.error(
           "Failed. Error retrieving total nutrients information. Error description: ",
           error
@@ -374,13 +387,18 @@ const HomeScreen2 = ({ navigation }) => {
     useEffect(() => {
       const resetDataOnStart = async () => {
         try {
+
+          // Test case 10 reset nutrients information, displays an attempt to reset nutrients information
           console.log("Reset nutrients information back to 0");
           await AsyncStorage.removeItem("totalNutrients");
 
+          // Test case 10 reset nutrients information, upon successful information reset prints confirmation text
           console.log("Successfully reset nutrients information");
 
-          //returns a failed message if the nutrients information is not able to set to 0
+          //returns a failed message if the nutrients information to reset
         } catch (error) {
+
+          // Test case 10 reset nutrients information, returns failure text when nutrients information to reset
           console.error(
             "Failed. Error resetting nutrients information. Error description: ",
             error
@@ -478,10 +496,16 @@ const HomeScreen2 = ({ navigation }) => {
                 style={styles[theme].themeButton}
                 onPress={() => {
                   try {
+
+                    // Test case 2 theme toggle functionality dark theme
+                    // Test case 3 theme toggle functionality light theme
                     console.log("Theme button has been triggered");
                     toggleTheme();
                   } catch (error) {
                     console.error(
+
+                      //Test case 2 theme toggle functionality dark theme, returns failure text if the toggle theme function does not work
+                      //Test case 3 theme toggle functionality light theme, returns failure text if the toggle theme function does not work
                       "Failed. Error toggling theme. Error description:",
                       error
                     );
@@ -513,12 +537,17 @@ const HomeScreen2 = ({ navigation }) => {
                   ]}
                   onPress={() => {
                     try {
+                      // Displays a console text to show an attempt to navigate to article screen
                       console.log(`Navigating to ${article.title} article`);
                       navigation.navigate("Articles");
+
+                      // Test case 4 navigate to articles screen
                       console.log(
                         "Successfully navigation to selected article"
                       );
                     } catch (error) {
+
+                      // Test case 4 navigate to articles screen, returns failure text if navigation to articles screen does not work 
                       console.error(
                         "Failed. Error navigating to articles. Error description: ",
                         error
@@ -537,10 +566,16 @@ const HomeScreen2 = ({ navigation }) => {
               style={styles[theme].postButton}
               onPress={() => {
                 try {
+
+                  // Displays a console text to show an attempt to navigate to social screen
                   console.log("Navigating to social page");
                   navigation.navigate("Social");
+
+                  // Test case 5 navigate to social screen
                   console.log("Successful navigation to social page");
                 } catch (error) {
+
+                  //Test case 5 navigate to social screen, returns failure text if navigation to social screen does not work 
                   console.error(
                     "Failed. Error navigating to social page. Error description: ",
                     error
@@ -614,7 +649,7 @@ const HomeScreen2 = ({ navigation }) => {
       </SafeAreaView>
     );
   } catch {
-    //returns an error if the page was not able to load.
+    // Test case 1 Successfully renders homescreen 2 component, returns failure text in console if homescreen2 component is not able to render
     console.log("Failed to load home screen page. Please try again");
   }
 };
