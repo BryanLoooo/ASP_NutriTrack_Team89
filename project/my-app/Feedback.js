@@ -77,6 +77,7 @@ const getStyles = (theme) =>
     submittedText: {
       fontSize: 18,
       fontWeight: 'bold',
+      color: theme === 'light' ? '#000' : '#fff', 
     },
   });
 
