@@ -224,7 +224,7 @@ const Social = ({ navigation }) => {
          {/* display welcome message if user is not in the process of adding a post */}
         {!addingPost && (
           <View style={[styles.welcomeContainer, posts.length > 0 ? styles.headerWelcome : styles.middleWelcome]}>
-            <Text style={styles.welcomeText}>
+            <Text style={[styles.welcomeText,  { color: currentTheme.textColor }]}>
               Welcome to NutriTrack's social page, a space where you can share and explore the health journeys of fellow community members!
             </Text>
           </View>
@@ -241,6 +241,7 @@ const Social = ({ navigation }) => {
               <TextInput
                 style={[styles.input, { borderColor: currentTheme.borderColor, color: currentTheme.textColor }]}
                 placeholder="Add a caption..."
+                placeholderTextColor={currentTheme.textColor}
                 value={caption}
                 onChangeText={setCaption} />
               {/* post or cancel posting */}
@@ -343,6 +344,7 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 17,
     textAlign: 'center',
+    
   },
   mainContentContainer: {
     flex: 1,
@@ -416,7 +418,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     marginVertical: 10,
-  },
+  }
 });
     
 export default Social;
