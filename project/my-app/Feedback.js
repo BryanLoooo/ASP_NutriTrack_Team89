@@ -112,7 +112,7 @@ const FeedbackForm = ({ navigation }) => {
       // error handling
       try {
         await addFeedback({ feedback, rating });
-        // print the submitted feedback and rating
+        // test case 2: prints the submitted feedback and rating
         console.log('Submitted feedback:', feedback, 'Rating:', rating);
         // after submitted the feedback, it should reset the feedback input field, rating and any error messages displayed
         setFeedback('');
@@ -127,6 +127,7 @@ const FeedbackForm = ({ navigation }) => {
     } 
     // ensure the feedback field is not empty before submitting
     else {
+      // test case 4&5: prints the error message if either feedback or rating is left empty before submissions
       setError('Feedback and rating cannot be empty.');
     }
   };
@@ -141,7 +142,12 @@ const FeedbackForm = ({ navigation }) => {
     // apply the theme selected -- light or dark 
     <View style={[styles.container, { backgroundColor: currentTheme.backgroundColor }]}>
       <View style={styles.themeButtonContainer}>
-        <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
+      <TouchableOpacity style={styles.themeButton} onPress ={() =>
+        {
+          // test case 1: if the theme changes
+          console.log("Theme changed to", theme === "light" ? "dark" : "light", "mode while on feedback page")
+          toggleTheme()
+        }}>
           <Image
             style={styles.themeButtonImage}
             source={theme === "light"
@@ -198,6 +204,8 @@ const FeedbackForm = ({ navigation }) => {
 
 // after the feedback is submitted, it should display the thank you message
 const SubmittedFeedback = ({ styles }) => (
+  // test case 3: if thank message is displayed after submission of feedback
+  console.log('Thank you message displayed after submitting feedback'),
   <View style={styles.submittedContainer}>
     <Text style={styles.submittedText}>Thank you for your feedback!</Text>
   </View>

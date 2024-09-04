@@ -95,6 +95,7 @@ const Social = ({ navigation }) => {
         setImage(source);  
         setAddingPost(true);
       }
+      // test case 3: Image to be posted has been chosen, at the preview stage
       if (result){
         console.log('Image to be posted has been chosen')
       }
@@ -152,6 +153,7 @@ const Social = ({ navigation }) => {
           createdAt: new Date(),
           userId: currentUserId,
         });
+        // test case 4: able to successfully post the image with the caption
         console.log('image successfully posted: ', image)
         console.log('caption for the chosen image: ', caption)
         // create a new post object with the uploaded data
@@ -189,9 +191,15 @@ const Social = ({ navigation }) => {
       newLikes -= 1;
       // remove user from likedBy array, since the post is disliked now
       newLikedBy = newLikedBy.filter(userId => userId !== currentUserId);
+
+      //test case 7: If already liked by the user and heart icon is reclicked, removes the like
+      console.log('Heart icon clicked when its already liked, user does not want to like the image')
+
     } 
     // increase the likes and add the user to the array
     else {
+      // test case 5: user has liked the image, heart should turn red
+      console.log('Heart icon clicked, user liked the image')
       newLikes += 1;
       newLikedBy.push(currentUserId);
     }
@@ -213,7 +221,12 @@ const Social = ({ navigation }) => {
     <View style={[styles.container, { backgroundColor: currentTheme.backgroundColor }]}>
       {/* Theme Toggle Button */}
       <View style={styles.themeButtonContainer}>
-        <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
+      <TouchableOpacity style={styles.themeButton} onPress= {() =>{
+          // test case 1: ensure theme is being toggled
+          console.log("Theme changed to", theme === "light" ? "dark" : "light", "mode while on social page"),
+          toggleTheme()
+        }}
+        >
           <Image
             style={styles.themeButtonImage}
             source={theme === "light" ? require("../../project/my-app/assets/Sun.png") : require("../../project/my-app/assets/Moon.png")} />
@@ -248,6 +261,8 @@ const Social = ({ navigation }) => {
               <View style={styles.buttonContainer}>
                 {/** cancel button and if cancelled, the caption, and selected image will be resetted */}
                 <Button title="Cancel" onPress={() => {
+                  // test case 5: able to cancel the process of posting an image middway
+                  console.log('cancel button clicked, image not posted')
                   setAddingPost(false);
                   setImage(null);
                   setCaption('');
@@ -288,7 +303,11 @@ const Social = ({ navigation }) => {
                 contentContainerStyle={{ paddingBottom: 100 }}  
               />
               {/* add post button near the footer */}
-              <TouchableOpacity onPress={pickImage} style={styles.fixedAddPostButton}>
+              <TouchableOpacity style={styles.fixedAddPostButton} onPress={() => {
+                //test case 2: add post button should open up the gallery
+                console.log('Add post button clicked and gallery opens up')
+                pickImage()
+                }} >
                 <Text style={styles.addPostButtonText}>Add Post</Text>
               </TouchableOpacity>
             </>
