@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; //import useState and useEffect
 import {
   View,
   Text,
@@ -10,35 +10,35 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage for local storage
-import { useTheme } from "./ThemeContext"; // Import custom ThemeContext for theming
-import Footer from './Footer.js'; // Adjust the path based on your project structure
+import AsyncStorage from "@react-native-async-storage/async-storage"; //To use AsyncStorage to store in react.
+import { useTheme } from "./ThemeContext"; //Import theme from themeContext.js
+import Footer from './Footer.js'; // Importing the Footer component for navigation
 
-// Define theme settings for light and dark modes
+// Theme configurations for light and dark modes
 const themes = {
   light: {
     backgroundColor: "#fff",
     textColor: "#333",
     borderColor: "#ccc",
     linkColor: "blue",
-    placeholderColor: "#888", // Add placeholder color for light theme
+    placeholderColor: "#888", // Placeholder color for light theme
   },
   dark: {
     backgroundColor: "#333",
     textColor: "#fff",
     borderColor: "#888",
     linkColor: "lightblue",
-    placeholderColor: "#aaa", // Add placeholder color for dark theme
+    placeholderColor: "#aaa", // Placeholder color for dark theme
   },
 };
 
-// Dynamic stylesheet function that adjusts styles based on the current theme
+// Dynamically generate styles based on the selected theme
 const getStyles = (theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
       padding: 20,
-      paddingBottom: 110, // Leave space for the footer
+      paddingBottom: 110,
       backgroundColor: themes[theme].backgroundColor,
     },
     label: {
@@ -91,22 +91,28 @@ const getStyles = (theme) =>
     },
   });
 
+//Load the food screen
 const FoodScreen = ({ navigation }) => {
-  const { theme } = useTheme(); // Get the current theme
-  const styles = getStyles(theme); // Get styles based on the current theme
+  console.log("Test Case 1: Food.js page loaded successfully."); // Test Case 1 to test if the food page loaded successfully
 
-  const [query, setQuery] = useState(""); // State for search query input
-  const [foods, setFoods] = useState([]); // State for storing fetched food items
-  const [selectedFood, setSelectedFood] = useState(null); // State for the selected food item
-  const [carbs, setCarbs] = useState(""); // State for storing carbs
-  const [fats, setFats] = useState(""); // State for storing fats
-  const [protein, setProtein] = useState(""); // State for storing protein
-  const [calories, setCalories] = useState(""); // State for storing calories
+  // Access the current theme using the useTheme hook
+  const { theme } = useTheme();
+  console.log("Test Case 2: Current theme is:", theme); // Test Case 2
 
-  const appId = "106a2498"; // Edamam App ID
-  const apiKey = "d444d58428c68ef47c2f7f97014c0027"; // Edamam API Key
+  const styles = getStyles(theme); // Dynamically apply styles based on the theme
 
-  // Fetch food data from the Edamam API based on the query
+  const [query, setQuery] = useState(""); // Store search query
+  const [foods, setFoods] = useState([]); // Store fetched food items
+  const [selectedFood, setSelectedFood] = useState(null); // Store the selected food item
+  const [carbs, setCarbs] = useState(""); // Store carbs value
+  const [fats, setFats] = useState(""); // Store fats value
+  const [protein, setProtein] = useState(""); // Store protein value
+  const [calories, setCalories] = useState(""); // Store calories value
+
+  const appId = "106a2498"; // Edamam API ID
+  const apiKey = "d444d58428c68ef47c2f7f97014c0027"; // Edamam API key
+
+  // Fetch food data from the API based on the query
   const fetchFoodData = async () => {
     try {
       const response = await fetch(
@@ -118,29 +124,43 @@ const FoodScreen = ({ navigation }) => {
       }
 
       const data = await response.json();
-      setFoods([{ ...data, food_name: query }]); // Set the fetched food data
+      setFoods([{ ...data, food_name: query }]); // Store the fetched data
+      console.log("Test Case 4: Food data fetched successfully!!"); // Test Case 4
     } catch (error) {
-      console.error("Error fetching food data:", error);
+      console.log("Test Case 5: Error fetching food data:", error); // Test Case 5
     }
   };
 
-  // Handle food selection and calculate nutrient details
+  // Track changes in the 'foods' array using the useEffect hook
+  useEffect(() => {
+    if (foods.length === 0) return;
+    console.log("Test Case 6: Food item selected:", foods[0].food_name); // Test Case 6
+  }, [foods]);
+
+  // Handle the selection of a food item and calculate its nutrients
   const selectFood = (food) => {
     setSelectedFood(food);
     calculateNutrients(food);
   };
 
-  // Calculate nutrient values for the selected food
+  // Calculate the nutrients of the selected food
   const calculateNutrients = (food) => {
     const carbNutrient = food.totalNutrients.CHOCDF ? food.totalNutrients.CHOCDF.quantity : 0;
     const fatNutrient = food.totalNutrients.FAT ? food.totalNutrients.FAT.quantity : 0;
     const proteinNutrient = food.totalNutrients.PROCNT ? food.totalNutrients.PROCNT.quantity : 0;
     const caloriesNutrient = food.calories ? food.calories : 0;
 
-    setCarbs(carbNutrient.toFixed(1)); // Set carbs with one decimal precision
-    setFats(fatNutrient.toFixed(1)); // Set fats with one decimal precision
-    setProtein(proteinNutrient.toFixed(1)); // Set protein with one decimal precision
-    setCalories(caloriesNutrient.toFixed(1)); // Set calories with one decimal precision
+    setCarbs(carbNutrient.toFixed(1)); // Store the carbs value with 1 decimal precision
+    setFats(fatNutrient.toFixed(1)); // Store the fats value with 1 decimal precision
+    setProtein(proteinNutrient.toFixed(1)); // Store the protein value with 1 decimal precision
+    setCalories(caloriesNutrient.toFixed(1)); // Store the calories value with 1 decimal precision
+
+    console.log(
+      "Test Case 7: Nutrients calculated - Carbs:", carbNutrient,
+      "Fats:", fatNutrient,
+      "Protein:", proteinNutrient,
+      "Calories:", caloriesNutrient
+    ); // Test Case 7
   };
 
   // Save the selected food's nutrient data to AsyncStorage
@@ -152,6 +172,8 @@ const FoodScreen = ({ navigation }) => {
       calories: parseFloat(calories),
     };
 
+    console.log("Test Case 8: Current nutrient values before saving:", currentNutrients); // Test Case 8
+
     try {
       const savedNutrients = await AsyncStorage.getItem("totalNutrients");
       let updatedNutrients = {
@@ -161,7 +183,7 @@ const FoodScreen = ({ navigation }) => {
         calories: 0,
       };
 
-      // Update nutrients if there are already saved nutrients
+      // Update stored nutrients by adding the current nutrient values
       if (savedNutrients) {
         const parsedNutrients = JSON.parse(savedNutrients);
         updatedNutrients = {
@@ -175,24 +197,25 @@ const FoodScreen = ({ navigation }) => {
       }
 
       await AsyncStorage.setItem("totalNutrients", JSON.stringify(updatedNutrients));
-
-      // Show success alert
+      console.log("Test Case 9: Food data saved successfully:", currentNutrients); // Test Case 9
       Alert.alert("Success", "Food has been saved successfully!");
 
     } catch (error) {
-      console.error("Error saving food data:", error);
+      console.log("Test Case 10: Error saving food data:", error); // Test Case 10
     }
   };
 
-  // Handle food search action
+  // Handle the search functionality when the 'Search' button is clicked
   const handleSearch = () => {
+    console.log("Test Case 3: Search button clicked with query:", query); // Test Case 3
     if (query.length > 0) {
       fetchFoodData();
     } else {
-      setFoods([]); // Clear food list if the query is empty
+      setFoods([]);
     }
   };
 
+  // What will be display on the mobile screen
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -200,9 +223,11 @@ const FoodScreen = ({ navigation }) => {
         <TextInput
           style={styles.input}
           placeholder="Eg:100g of chicken thigh"
-          placeholderTextColor={themes[theme].placeholderColor} // Adjust the placeholder text color based on theme
+          placeholderTextColor={themes[theme].placeholderColor}
           value={query}
-          onChangeText={setQuery}
+          onChangeText={(text) => {
+            setQuery(text);
+          }}
         />
         <Button title="Search" onPress={handleSearch} />
         {selectedFood ? (
@@ -242,10 +267,7 @@ const FoodScreen = ({ navigation }) => {
                 />
               </View>
             </View>
-            <Button
-              title="Save Food"
-              onPress={saveFood}
-            />
+            <Button title="Save Food" onPress={saveFood} />
           </View>
         ) : (
           <FlatList
@@ -267,5 +289,26 @@ const FoodScreen = ({ navigation }) => {
   );
 };
 
-//export FoodScreen as an external module for referencing
 export default FoodScreen;
+
+
+//API Integration:
+//One of the significant challenge during the development phase of the Food Search Page was to identify the correct and reliable API.
+//Initially, I tried Nutritionix API and USDA FoodData Central API.
+//However, these 2 API I experienced slow responding when I request from their API.
+//As a result, i need to find another API that is more suitable to deliver the necessary nutritional details for my requirements.
+//As a result I switch around with different APIs and testing different ones for performance
+//and Edamam API provides a good balance between the depth of nutritional data and the speed of responses.
+
+
+//Displaying Nutritional Information:
+//One of the challenge that I faced is after retrieving the food data,
+//parsing the JSON response to display the nutritional information is a challenge
+//as some of the food does not have certain nutritional data which could led to error or blank field in the UI.
+//As a result, I need to ensure data validation for missing or incomplete nutritional values before putting them into key.
+
+
+//UI Responsiveness in Dark Mode.
+//One of the challenge that i faced is to change the page to dark mode when the button is toggle on home page.
+//Implementing dynamic theme switcher while ensuring the Food Search Page is fully responsive across the whole devices.
+//
