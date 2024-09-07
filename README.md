@@ -6,11 +6,6 @@ NutriTrack provides daily calorie tracking and suggests recommended exercises fo
 This project uses Expo for development. To run the project, please use the following command:
 
 ```
-npx expo start
-```
-or
-
-```
 npx expo run
 ```
 To test the application in it's development with native features (such as the login/sign up functions.)
