@@ -655,3 +655,36 @@ const HomeScreen2 = ({ navigation }) => {
 };
 // export HomeScreen as a external module for referencing
 export default HomeScreen2;
+
+// Theme toggling issues
+// The toggle functionality was not elaborate enough in the first iteration. Thus causing only a small change in the theme colour
+// Due to this issue I added a custom theme variable where when the user clicks onto the theme button, the icon image will change,
+// and the state of the variable will change accordingly. The state will then request for the custom light or dark mode UI themes. 
+
+// AsyncStorage errors
+// The home screen page uses an AsyncStorage to store and retrieve data, but errors might occur during this process. This might
+// cause the app to crash or to not retrieve and display accurate data. By integrating additional error checks and verifications, 
+// I have improved the execution of the retrieval and accuracy of the macronutrients and calorie information being displayed.
+// With more checks and detailed error messages, it allows developers to be able to find the source of the issue quickly, and
+// address it immeadiately.
+
+// Navigation issues
+// The app has a navigational function to navigate to different screens, but navigation might not work as expected. This might
+// cause the app to creash and not display the correct screens as expected. I solved this by adding additional checks and print
+// messages to ensure that the targeted page has been successfully reached as well as error messages to indicate a failure to
+// reach the targeted page
+
+// Data calculation and display
+// In the app it calculates and displays various data, such as daily progress and nutrient information, but errors might occur
+// during these calculations. This might cause the app to display incorrect information. To resolve this issue I ensured that
+// the formula that I used to calculate the daily calorie count was accurate, and I also included a style for each progress
+// bar to be limited to a set length so as to stop the bar from exceeding the length of the set screen.
+
+// User interface experience
+// In the first iteration of the application, the user interface was functional but not visualy pleasing and modern. To resolve
+// this issue I researched on modern home screen dashboards and came up with a new clean and seamless design that users can enjoy
+// using on a daily basis. I took out the search bar and included on the components included in the final iteration. Having a
+// clean and efficient design promotes higher level of learnability and user experience as well as maintains the feel of the app.
+
+
+
