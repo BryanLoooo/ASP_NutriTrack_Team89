@@ -212,3 +212,10 @@ const SubmittedFeedback = ({ styles }) => (
 );
 
 export default FeedbackForm;
+
+// technical difficulties I face while creating the application
+
+/* The page is of low complexity since it contains only 2 elements - feedback input and star rating system. The feedback is stored using 
+firebase so it can be updated and viewed. Creating the firebase was the only issue in the beginning because of the configuration while creating 
+the database. As it was my first time utilizing firebase, applying the correct settings such as adding the application, creating the collection
+was new but nevertheless it was easily manageable using youtube videos and once that was done, creating the page was simple */

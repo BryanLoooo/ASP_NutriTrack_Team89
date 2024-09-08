@@ -441,3 +441,29 @@ const styles = StyleSheet.create({
 });
     
 export default Social;
+
+// Technical difficulties while creating the social page 
+
+// API INTEGRATION OF V1: 
+/* For the first version of social page, I used Eventbrite's API but there were issues like the references for searching events, 
+retrieving all events under a category, etc were deprecated. This meant that the events had to 
+specifically be retrieved using their unique event ID, venue ID, organisation ID, etc. Using this API was risky and tedious to move forward 
+with as it meant that the current references might also be deprecated. 
+The event addition into the categories would also require alot of time and effort to manually find the event ID, ensure event is no 
+long displayed after the date has passed, event falls under the health and fitness sector, and more. Hence why there were only 
+limited options for the users to choose from.  While it will meet the aim of the page, it will not be as efficient and effective 
+as it would be with a proper API, where there are references to insert all the events under a specific category and remove 
+them once the data has passed. 
+
+Thus why we decided to change the objective of the page, so it can be more functional and 
+effective. So for the second version of the page, the social page is a simple social feed where users can add images from their device, 
+add a description and like posts. For this version, the only issue was creating the firebase storage because with a local storage, 
+there were issues viewing the posted images from another device, hence opted for firebase storage. The problem was integrating the 
+storage into the code, but with the aid of youtube videos, it could be properly set up and used to store the images.*/
+
+
+/*The page is of low complexity since it only contains 2 main elements - feedback input and star rating system.
+The feedback is stored using firebase so it can be updated and viewed. Creating the firebase was the only issue in the 
+beginning because of the configuration while creating the database. As it was my first time using and creating a database 
+using firebase, applying the correct settings such as adding the application, creating the collection was new but nevertheless.
+However, it was easily manageable using youtube videos and once that was done, creating the page was simple.*/
