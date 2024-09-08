@@ -17,8 +17,10 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 
-const webClientId = "904819533566-bp32cqandl3bv0jbpc0cdndo4c4rl0je.apps.googleusercontent.com";
-const androidClientId = "904819533566-a6s6ko55ra21pv35kfc0rtcbeg90gpj8.apps.googleusercontent.com";
+const webClientId =
+  "904819533566-bp32cqandl3bv0jbpc0cdndo4c4rl0je.apps.googleusercontent.com";
+const androidClientId =
+  "904819533566-a6s6ko55ra21pv35kfc0rtcbeg90gpj8.apps.googleusercontent.com";
 
 const SignupScreen = () => {
   const navigation = useNavigation();
@@ -29,10 +31,8 @@ const SignupScreen = () => {
 
   const configureGoogleSignIn = () => {
     GoogleSignin.configure({
-      webClientId:
-        webClientId,
-      androidClientId:
-        androidClientId,
+      webClientId: webClientId,
+      androidClientId: androidClientId,
     });
   };
 
@@ -42,18 +42,20 @@ const SignupScreen = () => {
 
   const googleSignIn = async () => {
     console.log("Pressed sign in");
-  
+
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       console.log("Google Sign-In Successful:", userInfo);
-  
+
       // Create a Google credential with the token
-      const googleCredential = auth.GoogleAuthProvider.credential(userInfo.idToken);
-  
+      const googleCredential = auth.GoogleAuthProvider.credential(
+        userInfo.idToken
+      );
+
       // Sign-in the user with the credential
       await auth().signInWithCredential(googleCredential);
-  
+
       // Navigate to the Home2 screen
       navigation.navigate("Home2");
     } catch (error) {
@@ -72,17 +74,11 @@ const SignupScreen = () => {
       navigation.navigate("LOGIN");
     } catch (error) {
       console.error("Signup Error:", error);
-      if (
-        error.code === "auth/email-already-in-use"
-      ) {
+      if (error.code === "auth/email-already-in-use") {
         setError("Email already in use");
-      } else if (
-        error.code === "auth/invalid-email"
-      ) {
+      } else if (error.code === "auth/invalid-email") {
         setError("Invalid email");
-      } else if (
-        error.code === "auth/weak-password"
-      ) {
+      } else if (error.code === "auth/weak-password") {
         setError("Password should be at least 6 characters");
       } else {
         setError(error.message);
@@ -292,3 +288,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
+
+// User Data Management: The SignupScreen.jsx file collects additional user information (phone number) that isn't part of the
+// default Firebase user object. This presents a challenge in storing and managing this extra data alongside the user's
+// authentication information. I addressed this by creating a separate document in Firestore for each user, using their
+// UID as the document ID. This document stores the phone number and any other additional user information.
+// When a user signs up, I first create their authentication account, then immediately create or update their
+// Firestore document with the additional data. This approach keeps the authentication and additional user data
+// separate but easily linkable, allowing for more flexible data management and querying capabilities.

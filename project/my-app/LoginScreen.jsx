@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Handling Asynchronous Operations: The LoginScreen.jsx file contains several asynchronous operations, such as signing in 
-// with Google and handling login. These operations can lead to race conditions if not handled properly. 
-// For example, if a user quickly taps the sign-in button multiple times, it could trigger multiple sign-in requests. 
-// This could be mitigated by disabling the button while the sign-in operation is in progress.
+// Handling Asynchronous Operations: The LoginScreen.jsx file contains several asynchronous operations, such as signing in
+// with Google and handling login. These operations can lead to race conditions if not handled properly.
+// For example, if a user quickly taps the sign-in button multiple times, it could trigger multiple sign-in requests.
+// I mitigated this by disabling the button while the sign-in operation is in progress.
