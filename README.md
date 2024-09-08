@@ -6,18 +6,13 @@ NutriTrack provides daily calorie tracking and suggests recommended exercises fo
 This project uses Expo for development. To run the project, please use the following command:
 
 ```
-npm expo start
-```
-or
-
-```
-npm expo run
+npx expo run
 ```
 To test the application in it's development with native features (such as the login/sign up functions.)
 
 ### Important Note
 
-Please use `npm expo run` instead of other commands like `npm start` or `expo start`. This ensures that the project runs correctly with all necessary configurations as Firebase's User Authentication only works in a development build/native environment. If you wish to run the command `npm expo run`, you will need to set this up by configuring an AVD (Android Virtual Device), which can be done by downloading Android Studio and installing the neccessary SDK and tools. If you do not wish to go through this process, just **comment out the login and sign up pages in App.js**.
+Please use `npx expo run` instead of other commands like `npx start` or `expo start`. This ensures that the project runs correctly with all necessary configurations as Firebase's User Authentication only works in a development build/native environment. If you wish to run the command `npx expo run`, you will need to set this up by configuring an AVD (Android Virtual Device), which can be done by downloading Android Studio and installing the neccessary SDK and tools. If you do not wish to go through this process, just **comment out the login and sign up pages in App.js**.
 
 ## Setting Up an Android Virtual Device (AVD) for npm expo run
 
@@ -67,14 +62,14 @@ Make sure you have the following installed:
 To start the project, run:
 
 ```
-npm expo run
+npx expo run
 ```
 or
 
 ```
-npm expo start
+npx expo start
 ```
-**Take note that you still might have to comment out user authentication related pages when running `npm expo start` as there might be errors**
+**Take note that you still might have to comment out user authentication related pages when running `npx expo start` as there might be errors**
 
 This will start the Expo development server and provide you with options to run the app on various platforms (iOS simulator, Android emulator, or web).
 

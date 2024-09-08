@@ -308,6 +308,7 @@ const styles = StyleSheet.create({
 //Main homescreen2 component
 const HomeScreen2 = ({ navigation }) => {
   try {
+    // Test case 1 Successfully renders homescreen2 component
     console.log("Home screen page has been executed successfully");
 
     //get the current page theme and theme toggler from context
@@ -329,6 +330,7 @@ const HomeScreen2 = ({ navigation }) => {
     //function to fetch stored nutrients information from AsyncStorage
     const fetchTotalNutrients = async () => {
       try {
+        // Test case 8 fetch total nutrients information, displays an attempt to retrieve nutrients information
         console.log("Retrieving total nutrients information");
         const savedNutrients = await AsyncStorage.getItem("totalNutrients");
 
@@ -342,9 +344,13 @@ const HomeScreen2 = ({ navigation }) => {
           //checks if the current totalCalories is within the range
           if (totalCalories > 4000) {
             Alert.alert("Max calories for the day have been reached.");
+
+            // Test case 6 daily calorie goal reached alert
             console.log("Max limit for the day has been reached");
           } else if (totalCalories < 4000) {
             setTotalCalories(parsedNutrients.calories);
+
+            // Test case 7 daily calorie goal not reached
             console.log(
               "Limit for the day has not been reached. Calories added."
             );
@@ -352,17 +358,20 @@ const HomeScreen2 = ({ navigation }) => {
             console.log("No food information has been logged");
           }
 
+          // Test case 8 fetch total nutrients information
           console.log(
             "Successfully retrieved and update total nutrients information"
           );
 
           //returns a failed message if there is no nutrients information
         } else {
+          // Test case 9 fetch total nutrients information set to 0
           console.log(
             "Current nutrients information is all set to 0. Please add food items to see updated information"
           );
         }
       } catch (error) {
+        // Test case 8 fetch total nutrients information, returns failure text if the nutrients information has not been retrieved
         console.error(
           "Failed. Error retrieving total nutrients information. Error description: ",
           error
@@ -374,13 +383,16 @@ const HomeScreen2 = ({ navigation }) => {
     useEffect(() => {
       const resetDataOnStart = async () => {
         try {
+          // Test case 10 reset nutrients information, displays an attempt to reset nutrients information
           console.log("Reset nutrients information back to 0");
           await AsyncStorage.removeItem("totalNutrients");
 
+          // Test case 10 reset nutrients information, upon successful information reset prints confirmation text
           console.log("Successfully reset nutrients information");
 
-          //returns a failed message if the nutrients information is not able to set to 0
+          //returns a failed message if the nutrients information to reset
         } catch (error) {
+          // Test case 10 reset nutrients information, returns failure text when nutrients information to reset
           console.error(
             "Failed. Error resetting nutrients information. Error description: ",
             error
@@ -478,10 +490,14 @@ const HomeScreen2 = ({ navigation }) => {
                 style={styles[theme].themeButton}
                 onPress={() => {
                   try {
+                    // Test case 2 theme toggle functionality dark theme
+                    // Test case 3 theme toggle functionality light theme
                     console.log("Theme button has been triggered");
                     toggleTheme();
                   } catch (error) {
                     console.error(
+                      //Test case 2 theme toggle functionality dark theme, returns failure text if the toggle theme function does not work
+                      //Test case 3 theme toggle functionality light theme, returns failure text if the toggle theme function does not work
                       "Failed. Error toggling theme. Error description:",
                       error
                     );
@@ -513,12 +529,16 @@ const HomeScreen2 = ({ navigation }) => {
                   ]}
                   onPress={() => {
                     try {
+                      // Displays a console text to show an attempt to navigate to article screen
                       console.log(`Navigating to ${article.title} article`);
                       navigation.navigate("Articles");
+
+                      // Test case 4 navigate to articles screen
                       console.log(
                         "Successfully navigation to selected article"
                       );
                     } catch (error) {
+                      // Test case 4 navigate to articles screen, returns failure text if navigation to articles screen does not work
                       console.error(
                         "Failed. Error navigating to articles. Error description: ",
                         error
@@ -537,10 +557,14 @@ const HomeScreen2 = ({ navigation }) => {
               style={styles[theme].postButton}
               onPress={() => {
                 try {
+                  // Displays a console text to show an attempt to navigate to social screen
                   console.log("Navigating to social page");
                   navigation.navigate("Social");
+
+                  // Test case 5 navigate to social screen
                   console.log("Successful navigation to social page");
                 } catch (error) {
+                  //Test case 5 navigate to social screen, returns failure text if navigation to social screen does not work
                   console.error(
                     "Failed. Error navigating to social page. Error description: ",
                     error
@@ -614,9 +638,39 @@ const HomeScreen2 = ({ navigation }) => {
       </SafeAreaView>
     );
   } catch {
-    //returns an error if the page was not able to load.
+    // Test case 1 Successfully renders homescreen 2 component, returns failure text in console if homescreen2 component is not able to render
     console.log("Failed to load home screen page. Please try again");
   }
 };
 // export HomeScreen as a external module for referencing
 export default HomeScreen2;
+
+// Theme toggling issues
+// The toggle functionality was not elaborate enough in the first iteration. Thus causing only a small change in the theme colour
+// Due to this issue I added a custom theme variable where when the user clicks onto the theme button, the icon image will change,
+// and the state of the variable will change accordingly. The state will then request for the custom light or dark mode UI themes.
+
+// AsyncStorage errors
+// The home screen page uses an AsyncStorage to store and retrieve data, but errors might occur during this process. This might
+// cause the app to crash or to not retrieve and display accurate data. By integrating additional error checks and verifications,
+// I have improved the execution of the retrieval and accuracy of the macronutrients and calorie information being displayed.
+// With more checks and detailed error messages, it allows developers to be able to find the source of the issue quickly, and
+// address it immeadiately.
+
+// Navigation issues
+// The app has a navigational function to navigate to different screens, but navigation might not work as expected. This might
+// cause the app to creash and not display the correct screens as expected. I solved this by adding additional checks and print
+// messages to ensure that the targeted page has been successfully reached as well as error messages to indicate a failure to
+// reach the targeted page
+
+// Data calculation and display
+// In the app it calculates and displays various data, such as daily progress and nutrient information, but errors might occur
+// during these calculations. This might cause the app to display incorrect information. To resolve this issue I ensured that
+// the formula that I used to calculate the daily calorie count was accurate, and I also included a style for each progress
+// bar to be limited to a set length so as to stop the bar from exceeding the length of the set screen.
+
+// User interface experience
+// In the first iteration of the application, the user interface was functional but not visualy pleasing and modern. To resolve
+// this issue I researched on modern home screen dashboards and came up with a new clean and seamless design that users can enjoy
+// using on a daily basis. I took out the search bar and included on the components included in the final iteration. Having a
+// clean and efficient design promotes higher level of learnability and user experience as well as maintains the feel of the app.
